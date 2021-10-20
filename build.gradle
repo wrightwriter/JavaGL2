@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation "org.jogamp.gluegen:gluegen-rt:2.3.1"
+    implementation "org.jogamp.jogl:jogl-all:2.3.1"
+
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-android-aarch64"
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-android-armv6"
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-amd64"
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-armv6"
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-armv6hf"
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-i586"
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-macosx-universal"
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-solaris-amd64"
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-solaris-i586"
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-windows-amd64"
+    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-windows-i586"
+
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-android-aarch64"
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-android-armv6"
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-linux-amd64"
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-linux-armv6"
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-linux-armv6hf"
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-linux-i586"
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-macosx-universal"
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-solaris-amd64"
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-solaris-i586"
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-windows-amd64"
+    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-windows-i586"
+}
+
+test {
+    useJUnitPlatform()
+}

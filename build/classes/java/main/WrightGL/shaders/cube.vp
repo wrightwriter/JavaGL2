@@ -1,0 +1,29 @@
+#version 430
+
+uniform mat4 M;
+uniform mat4 V;
+uniform mat4 P;
+uniform float Time;
+
+in vec3 vIn;
+in vec3 nIn;
+
+out vec2 uVar;
+out vec3 posVar;
+out vec3 nVar;
+
+#define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
+
+void main() {
+    gl_Position = vec4(vIn,1);
+
+    float a = Time*1.0f;
+    mat2 r = mat2(cos(a), -sin(a), sin(a), cos(a));
+    gl_Position.xz = gl_Position.xz*r;
+
+    mat4 MVP = P * V * M;
+    gl_Position = MVP * gl_Position;
+    posVar = vIn;
+    nVar = nIn;
+    uVar = gl_Position.xy;
+}
