@@ -2,45 +2,43 @@ plugins {
     id 'java'
 }
 
+project.ext.lwjglVersion = "3.2.3"
+project.ext.lwjglNatives = "natives-windows"
+
 group 'org.example'
 version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
-    implementation "org.jogamp.gluegen:gluegen-rt:2.3.1"
-    implementation "org.jogamp.jogl:jogl-all:2.3.1"
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-android-aarch64"
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-android-armv6"
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-amd64"
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-armv6"
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-armv6hf"
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-i586"
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-macosx-universal"
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-solaris-amd64"
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-solaris-i586"
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-windows-amd64"
-    runtimeOnly  "org.jogamp.gluegen:gluegen-rt:2.3.1:natives-windows-i586"
+//    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+//    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+//    implementation "org.jogamp.gluegen:gluegen-rt:2.3.1"
+//    implementation "org.jogamp.jogl:jogl-all:2.3.1"
+    implementation "org.lwjgl:lwjgl"
+    implementation "org.lwjgl:lwjgl-assimp"
+    implementation "org.lwjgl:lwjgl-glfw"
+    implementation "org.lwjgl:lwjgl-openal"
+    implementation "org.lwjgl:lwjgl-opengl"
+    implementation "org.lwjgl:lwjgl-stb"
 
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-android-aarch64"
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-android-armv6"
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-linux-amd64"
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-linux-armv6"
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-linux-armv6hf"
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-linux-i586"
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-macosx-universal"
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-solaris-amd64"
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-solaris-i586"
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-windows-amd64"
-    runtimeOnly  "org.jogamp.jogl:jogl-all:2.3.1:natives-windows-i586"
+    implementation 'org.lwjgl:lwjgl-nanovg:3.2.3'
+    implementation 'org.lwjgl:lwjgl-nfd:3.2.3'
+    implementation 'org.lwjgl:lwjgl-shaderc:3.2.3'
+
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+    implementation 'com.sun.jna:jna:3.0.9'
 }
-
-test {
-    useJUnitPlatform()
-}
+//
+//test {
+//    useJUnitPlatform()
+//}

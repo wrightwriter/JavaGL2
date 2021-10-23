@@ -1,5 +1,7 @@
 #version 430
 
+uniform vec2 R;
+
 #define U gl_FragCoord
 //#define C gl_FragColor
 out vec4 C;

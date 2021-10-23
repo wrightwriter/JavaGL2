@@ -19,10 +19,19 @@ void main() {
 
     float a = Time*1.0f;
     mat2 r = mat2(cos(a), -sin(a), sin(a), cos(a));
-    gl_Position.xz = gl_Position.xz*r;
+//    gl_Position.xz = gl_Position.xz*r;
+//    gl_Position.z += 5.;
 
+//    mat4 MVP = P * V * M;
     mat4 MVP = P * V * M;
+//    mat4 MVP = M * V * P;
     gl_Position = MVP * gl_Position;
+//    gl_Position = vec4(
+//        sin(float(gl_VertexID) + Time),
+//        sin(float(gl_VertexID)*1.5 + Time),
+//        sin(float(gl_VertexID)*2.5 + Time),
+//        1
+//        );
     posVar = vIn;
     nVar = nIn;
     uVar = gl_Position.xy;

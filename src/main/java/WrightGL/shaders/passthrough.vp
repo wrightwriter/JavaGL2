@@ -1,9 +1,0 @@
-#version 430
-in vec2 v;
-
-out vec2 u;
-
-void main() {
-    u = v;
-    gl_Position = vec4( v, 0.0, 1.0 );
-}    

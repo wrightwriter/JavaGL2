@@ -9,7 +9,7 @@ in vec2 vIn;
 
 out vec4 C;
 
-#define U gl_FragCoord
+#define U gl_FragCoord.xy
 
 void main() {
     vec2 uv = U/R;

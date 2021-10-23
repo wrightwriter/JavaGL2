@@ -5,5 +5,5 @@ out vec2 uVar;
 
 void main() {
     gl_Position = vec4(vIn,1);
-    uVar = gl_position.xy;
+    uVar = gl_Position.xy;
 }

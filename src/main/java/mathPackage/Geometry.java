@@ -1,4 +1,4 @@
-package WrightGL;
+package mathPackage;
 
 public class Geometry {
     public static float[] triangle = {
