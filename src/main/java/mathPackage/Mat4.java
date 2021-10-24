@@ -85,7 +85,7 @@ public class Mat4 {
         };
         return new Mat4(a);
     }
-    public static Mat4 getTranslationMatrix(Vector translation){
+    public static Mat4 getTranslationMatrix(Vec3 translation){
         float[] a = {
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -94,7 +94,7 @@ public class Mat4 {
         };
         return new Mat4(a);
     }
-    public static Mat4 getScaleMatrix(Vector scale){
+    public static Mat4 getScaleMatrix(Vec3 scale){
         float[] a = {
                 scale.x(), 0, 0, 0,
                 0, scale.y(), 0, 0,
@@ -137,16 +137,16 @@ public class Mat4 {
 
         return new Mat4(a);
     }
-    public static Mat4 getLookAtMatrix(Vector eye, Vector center, Vector up) {
+    public static Mat4 getLookAtMatrix(Vec3 eye, Vec3 center, Vec3 up) {
         // TODO: check if this works.
-        final Vector f = (Vector.normalize(center.sub(eye)));
-        final Vector s = (Vector.normalize(Vector.cross(f, up)));
-        final Vector u = ((Vector.cross(s, f)));
+        final Vec3 f = (Vec3.normalize(center.sub(eye)));
+        final Vec3 s = (Vec3.normalize(Vec3.cross(f, up)));
+        final Vec3 u = ((Vec3.cross(s, f)));
         float[] projMatrix = {
                 s.x(), u.x(), -f.x(), 0.0f,
                 s.y(), u.y(), -f.y(), 0.0f,
                 s.z(), u.z(), -f.z(), 0.0f,
-                -Vector.dot(s,eye), -Vector.dot(u,eye), Vector.dot(f,eye), 0.0f
+                -Vec3.dot(s,eye), -Vec3.dot(u,eye), Vec3.dot(f,eye), 0.0f
         };
         return new Mat4(projMatrix);
     }

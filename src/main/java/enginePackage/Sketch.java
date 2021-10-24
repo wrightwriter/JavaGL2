@@ -4,6 +4,12 @@ import mainPackage.Global;
 import mathPackage.*;
 import static wrightglPackage.WrightGL.*;
 
+import imgui.ImGui;
+
+import imgui.flag.ImGuiConfigFlags;
+import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
+
 import mathPackage.Geometry;
 
 
@@ -19,20 +25,21 @@ public class Sketch extends Engine {
 	public static void main(String[] args){
 		Global.engine = new Sketch();
 		Global.engine.start();
+		Global.engine.destroy();
 	}
 
 
 	protected Program cubeProgram, compositeProgram, postProgram;
-	public Framebuffer mainFramebuffer;
-	public Framebuffer compositeFramebuffer;
-	public Framebuffer postFramebuffer;
+	public FB mainFB;
+	public FB compositeFB;
+	public FB postFB;
 
 	Thing postThing;
 	Thing compositeThing;
 //	@Override
 //	public void loop(){}
 	@Override
-	protected void settings(){
+	protected void initSettings(){
 		resx = 1024;
 		resy = 768;
 	}
@@ -40,9 +47,9 @@ public class Sketch extends Engine {
 	@Override
 	protected void setup(){
 		// Framebuffers
-		mainFramebuffer = new Framebuffer( 1, true );
-		compositeFramebuffer = new Framebuffer( 1, false);
-		postFramebuffer = new Framebuffer( 1, false);
+		mainFB = new FB( 1, true );
+		compositeFB = new FB( 1, true);
+		postFB = new FB( 1, true);
 
 		// Matrices
 		viewMatrix = Mat4.getIdentityMatrix();
@@ -54,23 +61,23 @@ public class Sketch extends Engine {
 		postProgram = new Program("quad.vp", "post.fp");
 
 		// Vertex Buffers
-		VertexBuffer cubeVertexBuffer = new VertexBuffer(
-				Geometry.cubeNormals, new int[] {3,3}, VertexBuffer.PrimitiveType.TRIANGLES);
+		VB cubeVB = new VB(
+				Geometry.cubeNormals, new int[] {3,3}, VB.PrimitiveType.TRIANGLES);
 //		cubeVertexBuffer.culling = VertexBuffer.VertexCulling.FRONT;
-		VertexBuffer quadVertexBuffer = new VertexBuffer(
-				Geometry.triangleStripQuad, new int[] {3}, VertexBuffer.PrimitiveType.TRIANGLES_STRIP
+		VB quadVB = new VB(
+				Geometry.triangleStripQuad, new int[] {2}, VB.PrimitiveType.TRIANGLES_STRIP
 		);
 
 		// Things
 
-		Thing cube = new Thing(cubeProgram, cubeVertexBuffer );
-		things.add(cube);
+		Thing cube = new Thing(cubeProgram, cubeVB);
+		thingQueue.add(cube);
 		cube.setCallback((thing) -> {
 			// Update model matrix
 			long now = System.currentTimeMillis();
 
-			Mat4 scale = Mat4.getScaleMatrix(new Vector( .5f, 0.5f, 0.5f));
-			Mat4 translate = Mat4.getTranslationMatrix( new Vector(0,0, 6) );
+			Mat4 scale = Mat4.getScaleMatrix(new Vec3( .5f, 0.5f, 0.5f));
+			Mat4 translate = Mat4.getTranslationMatrix( new Vec3(0,0, 6) );
 			Mat4 rotateZ = Mat4.getRotationMatrix(Mat4.Axis.Y, (float)time );
 
 //			Mat4 model = Mat4.multiply(scale, translate);
@@ -79,8 +86,8 @@ public class Sketch extends Engine {
 			thing.modelMatrix = Mat4.multiply(translate,rotateZ);
 		});
 
-		compositeThing = new Thing( compositeProgram, quadVertexBuffer);
-		postThing = new Thing( postProgram, quadVertexBuffer);
+		compositeThing = new Thing( compositeProgram, quadVB);
+		postThing = new Thing( postProgram, quadVB);
 
 
 
@@ -88,7 +95,7 @@ public class Sketch extends Engine {
 
 	public void display(){
 
-		WGL.updateMatrices();
+		wgl.updateMatrices();
 
 		// Settings
 		glEnable(GL_BLEND);
@@ -99,33 +106,44 @@ public class Sketch extends Engine {
 		glEnable(GL_DEPTH_TEST);
 
 		// Framebuffer
-		Framebuffer.bind(Framebuffer.FbTarget.DRAW_FRAMEBUFFER, mainFramebuffer);
+		FB.bind(FB.Target.DRAW_FRAMEBUFFER, mainFB);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
 		// Draw stuff
-		for(Thing thing: things){
-			thing.render(null, null);
+		for(Thing thing: thingQueue){
+			thing.render();
 		}
 
 
 		// Post
-		Framebuffer.bind(Framebuffer.FbTarget.DRAW_FRAMEBUFFER, null);
+//		FB.bind(FB.Target.DRAW_FRAMEBUFFER, compositeFB);
+//		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//		glClear(GL_DEPTH_BUFFER_BIT);
+//
+//		compositeThing.render((thing)->{
+//			mainFB.setUniformTextures("g");
+//		});
 
-		compositeThing.render(null,(thing)->{
-			mainFramebuffer.setUniformTextures("g");
-		});
 
+//		// Blit framebuffer
+		FB.blitColour(mainFB, null );
+//		FB.blitColour(compositeFB, null );
+		FB.bind(FB.Target.DRAW_FRAMEBUFFER,null);
 
-		// Blit framebuffer
-		Framebuffer.blit(mainFramebuffer, null,
-				new Framebuffer.FbBitmask[]{ Framebuffer.FbBitmask.COLOR_BUFFER_BIT });
-//		Framebuffer.blit(compositeFramebuffer, null,
-//				new Framebuffer.FbBitmask[]{ Framebuffer.FbBitmask.COLOR_BUFFER_BIT });
+	}
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+	@Override
+	protected void drawImGui(){
+		if (io.keyboard.get(IO.Key.A).Down){
+			ImGui.begin("aa");
+			if (ImGui.button("aaaaa")){
+
+			}
+			ImGui.end();
+
+		}
 	}
 	public Sketch(){
 		String potato = "aaaaaaaaaaaaaaaaaa potat";

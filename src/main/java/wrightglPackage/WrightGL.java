@@ -27,8 +27,8 @@ import java.util.List;
 public class WrightGL {
 
     public Program currProgram;
-    public Framebuffer currReadFramebuffer;
-    public Framebuffer currDrawFramebuffer;
+    public FB currReadFB;
+    public FB currDrawFB;
     private Engine engine;
     public int currTexBindNumber;
 
@@ -40,17 +40,17 @@ public class WrightGL {
 //        float aspectRatio = (Global.engine.resx/Global.engine.resy);
 //        aspectRatio = aspectRatio/1.0f;
 
-        Global.engine.projectionMatrix = Mat4.getPerspectiveMatrix(50, 0.001f, 1024.0f, engine.resx, engine.resy);
+        Global.engine.projectionMatrix = Mat4.getPerspectiveMatrix(50, 0.001f, 1024.0f, engine.getResX(), engine.getResY());
 
     }
     public void setSharedUniforms(){
         // Set uniforms
-        float Time = (float)(System.currentTimeMillis() - Global.engine.start)/1000.f;
-        Global.engine.WGL.setUniform("Time", Time, WrightGL.UniformType.Float);
-        float[] res = {Global.engine.resx, Global.engine.resy};
-        Global.engine.WGL.setUniform("R", res, WrightGL.UniformType.Float);
-        Global.engine.WGL.setUniform("V", Global.engine.viewMatrix.vals, WrightGL.UniformType.Matrix);
-        Global.engine.WGL.setUniform("P", Global.engine.projectionMatrix.vals, WrightGL.UniformType.Matrix);
+        float Time = (float)(System.currentTimeMillis() - Global.engine.timeStart)/1000.f;
+        Global.engine.wgl.setUniform("Time", Time, WrightGL.UniformType.Float);
+        float[] res = {Global.engine.getResX(), Global.engine.getResY()};
+        Global.engine.wgl.setUniform("R", res, WrightGL.UniformType.Float);
+        Global.engine.wgl.setUniform("V", Global.engine.viewMatrix.vals, WrightGL.UniformType.Matrix);
+        Global.engine.wgl.setUniform("P", Global.engine.projectionMatrix.vals, WrightGL.UniformType.Matrix);
     }
 
     static public class Shader{
@@ -73,7 +73,7 @@ public class WrightGL {
                     assert(false);
                     String errorLog =  glGetShaderInfoLog(pid, 1024) ;
                     // TODO: error
-                    System.out.println("Error compiling shader:" +  glGetShaderInfoLog(pid, 1024) ); ;
+                    System.out.println("Error compiling shader: " + fileLocation  + "\n"+  glGetShaderInfoLog(pid, 1024) ); ;
                 }
             } catch (IOException e){
                 assert(false);
@@ -123,9 +123,9 @@ public class WrightGL {
             }
         }
         public void use(){
-            Global.engine.WGL.currProgram = this;
-            Global.engine.WGL.currTexBindNumber = 0;
-            Global.engine.WGL.setSharedUniforms();
+            Global.engine.wgl.currProgram = this;
+            Global.engine.wgl.currTexBindNumber = 0;
+            Global.engine.wgl.setSharedUniforms();
             glUseProgram(pid);
         }
     }
@@ -244,10 +244,10 @@ public class WrightGL {
             stbi_image_free(image);
         }
         public void setUniform(int bindNumber, String name){
-            Program program = Global.engine.WGL.currProgram;
+            Program program = Global.engine.wgl.currProgram;
             if (bindNumber < 0) {
-                Global.engine.WGL.currTexBindNumber++;
-                bindNumber = Global.engine.WGL.currTexBindNumber;
+                Global.engine.wgl.currTexBindNumber++;
+                bindNumber = Global.engine.wgl.currTexBindNumber;
             }
             int loc = glGetUniformLocation(program.pid, name);
             if (isWritable)
@@ -266,31 +266,31 @@ public class WrightGL {
         }
 
     }
-    static public class Framebuffer{
+    static public class FB {
         public int pid;
         public List<Texture> textures = new ArrayList<Texture>();
         String name = null;
-        Texture depthTexture;
+        public Texture depthTexture;
 //        static Framebuffer DefaultFramebuffer;
-        public enum FbTarget{
+        public enum Target {
             FRAMEBUFFER(GL_FRAMEBUFFER),
             DRAW_FRAMEBUFFER(GL_DRAW_FRAMEBUFFER),
             READ_FRAMEBUFFER(GL_READ_FRAMEBUFFER),
-            ; private int value; private FbTarget(int value){ this.value = value; }
+            ; private final int value; private Target(int value){ this.value = value; }
         }
         public enum FbBitmask {
             COLOR_BUFFER_BIT(GL_COLOR_BUFFER_BIT),
             DEPTH_BUFFER_BIT(GL_DEPTH_BUFFER_BIT),
             ACCUM_BUFFER_BIT(GL_ACCUM_BUFFER_BIT),
             STENCIL_BUFFER_BIT(GL_STENCIL_BUFFER_BIT),
-            ; private int value; private FbBitmask(int value){ this.value = value; }
+            ; private final int value; private FbBitmask(int value){ this.value = value; }
         }
-        public Framebuffer(int texturesCnt, boolean hasDepth){
+        public FB(int texturesCnt, boolean hasDepth){
             this(
-                Global.engine.resx, Global.engine.resy, 1, true,
+                Global.engine.getResX(), Global.engine.getResY(), 1, true,
                 null, null, null, false);
         }
-        public Framebuffer(int _width, int _height, int texturesCnt, boolean hasDepth, Texture.InternalFormat internalFormat, Texture.Format format, Texture.Type type, boolean renderbuffer){
+        public FB(int _width, int _height, int texturesCnt, boolean hasDepth, Texture.InternalFormat internalFormat, Texture.Format format, Texture.Type type, boolean renderbuffer){
             pid = glCreateFramebuffers();
             glBindFramebuffer(GL_FRAMEBUFFER, pid);
 
@@ -304,16 +304,16 @@ public class WrightGL {
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
-        public static void bind(FbTarget target, Framebuffer fb){
-            if ( target == FbTarget.READ_FRAMEBUFFER)
-                Global.engine.WGL.currReadFramebuffer = fb;
-            else if ( target == FbTarget.DRAW_FRAMEBUFFER)
-                Global.engine.WGL.currDrawFramebuffer = fb;
-            else if ( target == FbTarget.FRAMEBUFFER)
-                Global.engine.WGL.currDrawFramebuffer = Global.engine.WGL.currReadFramebuffer = fb;
+        public static void bind(Target target, FB fb){
+            if ( target == Target.READ_FRAMEBUFFER)
+                Global.engine.wgl.currReadFB = fb;
+            else if ( target == Target.DRAW_FRAMEBUFFER)
+                Global.engine.wgl.currDrawFB = fb;
+            else if ( target == Target.FRAMEBUFFER)
+                Global.engine.wgl.currDrawFB = Global.engine.wgl.currReadFB = fb;
 
             glBindFramebuffer(target.value, fb == null ? 0 : fb.pid);
-            if(target == FbTarget.DRAW_FRAMEBUFFER || target == FbTarget.FRAMEBUFFER){
+            if(target == Target.DRAW_FRAMEBUFFER || target == Target.FRAMEBUFFER){
                 if (fb != null){
                     final int texAttachmentsCnt = fb.textures.size();
                     final int[] attachments = new int[texAttachmentsCnt];
@@ -335,11 +335,14 @@ public class WrightGL {
             }
         }
         // TODO: add filtering maybe?
-        public static void blit(Framebuffer read, Framebuffer write, FbBitmask[] bitmasks){
+        public static void blitColour(FB read, FB write){
+            blit(read, write, new FB.FbBitmask[]{ FB.FbBitmask.COLOR_BUFFER_BIT });
+        }
+        public static void blit(FB read, FB write, FbBitmask[] bitmasks){
             int pidRead = read == null ? 0 : read.pid;
             int pidWrite = write == null ? 0 : write.pid;
 
-            int[] screenRes = {Global.engine.resx,Global.engine.resy};
+            int[] screenRes = {Global.engine.getResX(),Global.engine.getResY()};
 
             int[] resRead = read == null ? screenRes : read.textures.get(0).res;
             int[] resWrite = write == null ? screenRes : write.textures.get(0).res;
@@ -348,7 +351,10 @@ public class WrightGL {
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, pidWrite);
 
             glReadBuffer(GL_COLOR_ATTACHMENT0);
-            glDrawBuffer(GL_BACK);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+//            if ()
+//            glDrawBuffer(GL_FRONT);
             int bitmask = 0;
             for (FbBitmask m: bitmasks){
                 bitmask = bitmask | m.value;
@@ -360,13 +366,13 @@ public class WrightGL {
                     bitmask, GL_NEAREST
             );
 
-            // Previous framebuffers.
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, Global.engine.WGL.currReadFramebuffer == null ? 0 : Global.engine.WGL.currReadFramebuffer.pid);
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Global.engine.WGL.currDrawFramebuffer == null ? 0 : Global.engine.WGL.currDrawFramebuffer.pid);
+            // Revert to revious framebuffers.
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, Global.engine.wgl.currReadFB == null ? 0 : Global.engine.wgl.currReadFB.pid);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Global.engine.wgl.currDrawFB == null ? 0 : Global.engine.wgl.currDrawFB.pid);
 
         }
     }
-    public static class VertexBuffer {
+    public static class VB {
         int pid;
         String name;
         FloatBuffer data;
@@ -378,23 +384,26 @@ public class WrightGL {
         int vertCnt;
 
         public enum VertexCulling{
-            FRONT(GL_FRONT), BACK(GL_BACK), DISABLED(GL_NONE) ; private int value; private VertexCulling(int value){ this.value = value; }
+            FRONT(GL_FRONT), BACK(GL_BACK), DISABLED(GL_NONE) ; private final int value; VertexCulling(int value){ this.value = value; }
         }
+
         public enum Type{
-            FLOAT(GL_FLOAT); private int value; private Type(int value){ this.value = value; }
+            FLOAT(GL_FLOAT); private final int value; Type(int value){ this.value = value; }
         }
+
         // SHOULDN'T BE HERE
         public enum PrimitiveType{
             TRIANGLES_STRIP(GL_TRIANGLE_STRIP), TRIANGLES(GL_TRIANGLES), POINTS(GL_TRIANGLES);
             private int value; private PrimitiveType(int value){ this.value = value; }
         }
-        public VertexBuffer(final float[] _geometry, final int[] _signature, PrimitiveType _primitiveType){
+
+        public VB(final float[] _geometry, final int[] _signature, PrimitiveType _primitiveType){
             primitiveType = _primitiveType == null ? primitiveType : _primitiveType;
 
             signature = _signature;
             vertSize = 0;
-            for (int i = 0; i < signature.length; i++){
-                vertSize += signature[i];
+            for (int j : signature) {
+                vertSize += j;
             }
             vertCnt = _geometry.length/vertSize;
 
@@ -404,13 +413,13 @@ public class WrightGL {
             pid = glCreateBuffers(); // gl.glGenBuffers(1, vertexBuffer);
 
             // Create vertex buffer.
-//            shaderProgram = _program;
 
             glBindBuffer(GL_ARRAY_BUFFER, pid);
             glBufferData(GL_ARRAY_BUFFER,  _geometry, GL_STATIC_DRAW);
 //            glBufferData(GL_ARRAY_BUFFER, data.capacity() * Float.BYTES, data, GL_STATIC_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
+
         public void render(){
             int oldCulling = glGetInteger(GL_CULL_FACE_MODE);
             glCullFace(culling.value);
@@ -423,7 +432,7 @@ public class WrightGL {
                 glEnableVertexAttribArray(i);
             }
 
-            glDrawArrays(GL_TRIANGLES, 0,  vertCnt);
+            glDrawArrays(primitiveType.value, 0,  vertCnt);
 
             glCullFace(oldCulling);
         }
@@ -436,7 +445,7 @@ public class WrightGL {
     public void setUniform(String _name, float[] _value, WrightGL.UniformType _type){
         final int loc = glGetUniformLocation(currProgram.pid, _name);
         if (loc < 0){
-            System.out.println("Error: loc location not found.");
+//            System.out.println("Error: loc location not found.");
         }
         final int len = _value.length;
         if(_type == WrightGL.UniformType.Matrix){
@@ -462,7 +471,7 @@ public class WrightGL {
     public void setUniform(String _name, float _value, WrightGL.UniformType _type){
         final int loc = glGetUniformLocation(currProgram.pid, _name);
         if (loc < 0){
-            System.out.println("Error: loc location not found.");
+//            System.out.println("Error: loc location not found.");
         }
         if (_type == WrightGL.UniformType.Matrix){
             // TODO: THROW ERROR
@@ -496,8 +505,7 @@ public class WrightGL {
         // LWJGL detects the context that is current in the current thread,
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
-        GL.createCapabilities();
-        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        GL.getCapabilities();
 
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -510,6 +518,7 @@ public class WrightGL {
 
         // Create VAO
 
+        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
         int vao = glCreateVertexArrays();
         glBindVertexArray(vao);
         glEnable(GL_CULL_FACE);
