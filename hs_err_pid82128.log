@@ -18,7 +18,7 @@
 
 ---------------  S U M M A R Y ------------
 
-Command Line: -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant mainPackage.Main
+Command Line: -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant _0_1.mainPackage.Main
 
 Host: AMD Ryzen 5 5600X 6-Core Processor             , 12 cores, 31G,  Windows 10 , 64 bit Build 19041 (10.0.19041.1202)
 Time: Thu Oct 21 16:48:50 2021 FLE Daylight Time elapsed time: 0.589148 seconds (0d 0h 0m 0s)
@@ -35,10 +35,10 @@ Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
 j  org.lwjgl.opengl.GL45C.nglCreateVertexArrays(IJ)V+0
 j  org.lwjgl.opengl.GL45C.glCreateVertexArrays(Ljava/nio/IntBuffer;)V+8
 j  org.lwjgl.opengl.GL45.glCreateVertexArrays(Ljava/nio/IntBuffer;)V+1
-j  wrightglPackage.wrightglPackage.initGL()V+17
-j  wrightglPackage.wrightglPackage.<init>()V+5
-j  enginePackage.enginePackage.<init>()V+24
-j  mainPackage.Main.main([Ljava/lang/String;)V+4
+j  _0_1.wrightglPackage._0_1.wrightglPackage.initGL()V+17
+j  _0_1.wrightglPackage._0_1.wrightglPackage.<init>()V+5
+j  _0_1.enginePackage._0_1.enginePackage.<init>()V+24
+j  _0_1.mainPackage.Main.main([Ljava/lang/String;)V+4
 v  ~StubRoutines::call_stub
 
 siginfo: EXCEPTION_ACCESS_VIOLATION (0xc0000005), writing address 0x0000000000000010
@@ -594,7 +594,7 @@ symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Pr
 
 VM Arguments:
 jvm_args: -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant 
-java_command: mainPackage.Main
+java_command: _0_1.mainPackage.Main
 java_class_path (initial): D:\Programming\School\JavaGL2\build\classes\java\main;D:\Programming\School\JavaGL2\build\resources\main;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-nanovg\3.2.3\718be4a13691d1cd276fa852326e9e837d65204e\lwjgl-nanovg-3.2.3.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-nfd\3.2.3\c44fee1043c022cf6614a28872d44cf114ca7737\lwjgl-nfd-3.2.3.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-shaderc\3.2.3\3612d4ed5466d100b7cf31f188530c3bdaa23145\lwjgl-shaderc-3.2.3.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-assimp\3.2.3\f62aa07a20afbdd3097efc296c4841e0d29700eb\lwjgl-assimp-3.2.3.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-assimp\3.2.3\4e60aeb75f0343c4a9ede4ef8b6b32ca702a00a3\lwjgl-assimp-3.2.3-natives-windows.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-glfw\3.2.3\5e520d5c290c8b012545a8d34fa5db5ab051ea53\lwjgl-glfw-3.2.3.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-glfw\3.2.3\b4d8a3477cdc2edcf7a5f1e822926be846223f54\lwjgl-glfw-3.2.3-natives-windows.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-openal\3.2.3\106742e805803ab9eab8e343f0fb31a3d263903c\lwjgl-openal-3.2.3.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-openal\3.2.3\ec898e8ce11b5886f4f532a1536283ef2817758d\lwjgl-openal-3.2.3-natives-windows.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-opengl\3.2.3\bdd534a323d0c8f54969b95e424b6ac8984f7d6e\lwjgl-opengl-3.2.3.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-opengl\3.2.3\e81cfc73ec8708e5e791ed770e4ec3edfc1bbab1\lwjgl-opengl-3.2.3-natives-windows.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-stb\3.2.3\40eccaa4fa86fc815f2e17946a392fb5fdcc286a\lwjgl-stb-3.2.3.jar;C:\Users\user\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-stb\3.2.3\817b21ec286f0ba3dcedb56a3bd275e6a9345be9\
 Launcher Type: SUN_STANDARD
 

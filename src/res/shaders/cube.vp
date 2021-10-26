@@ -8,9 +8,11 @@ uniform float Time;
 in vec3 vIn;
 in vec3 nIn;
 
-out vec2 uVar;
-out vec3 posVar;
-out vec3 nVar;
+out VS_OUT {
+    vec2 u;
+    vec3 p;
+    vec3 norm;
+} gs_in;
 
 #define rot(a) mat2(cos(a), -sin(a), sin(a), cos(a))
 
@@ -19,20 +21,8 @@ void main() {
 
     float a = Time*1.0f;
     mat2 r = mat2(cos(a), -sin(a), sin(a), cos(a));
-//    gl_Position.xz = gl_Position.xz*r;
-//    gl_Position.z += 5.;
 
-//    mat4 MVP = P * V * M;
-    mat4 MVP = P * V * M;
-//    mat4 MVP = M * V * P;
-    gl_Position = MVP * gl_Position;
-//    gl_Position = vec4(
-//        sin(float(gl_VertexID) + Time),
-//        sin(float(gl_VertexID)*1.5 + Time),
-//        sin(float(gl_VertexID)*2.5 + Time),
-//        1
-//        );
-    posVar = vIn;
-    nVar = nIn;
-    uVar = gl_Position.xy;
+    gs_in.norm = nIn;
+    gs_in.p = vIn;
+    gs_in.u = gl_Position.xy;
 }

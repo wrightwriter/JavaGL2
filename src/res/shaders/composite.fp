@@ -14,6 +14,7 @@ out vec4 C;
 
 #define U gl_FragCoord.xy
 
+
 void main() {
     vec2 uv = U/R;
     C = texture(gA, fract(uv));
