@@ -5,6 +5,7 @@ typealias EasingFunction = (Double, Double, Double, Double) -> Double
 
 fun easeLinear(t: Double, b: Double = 0.0, c: Double = 1.0, d: Double = 1.0) = c * (t / d) + b
 
+
 // -- constant
 
 fun easeZero(t: Double, b: Double = 0.0, c: Double = 1.0, d: Double = 1.0) = b
@@ -329,4 +330,44 @@ enum class Easing(val function: EasingFunction) {
     SineIn(::easeSineIn),
     SineInOut(::easeSineInOut),
     SineOut(::easeSineOut),
+
+}
+
+class GLSL private constructor() {
+    companion object{
+        fun lerp( a: Float, b: Float, x: Float ): Float {
+            return a + ( b - a ) * x;
+        }
+
+        fun mod( value: Float, divisor: Float ): Float {
+            return value - floor( value / divisor ) * divisor;
+        }
+        fun clamp( x: Float, l: Float, h: Float ): Float {
+            return min( max( x, l ), h );
+        }
+
+        fun saturate( x: Float ): Float {
+            return clamp(x, 0.0f, 1.0f);
+        }
+        fun map( x: Float, x0: Float, x1: Float, y0: Float, y1: Float ): Float {
+            return ( ( x - x0 ) * ( y1 - y0 ) / ( x1 - x0 ) + y0 );
+        }
+        fun mapClamped( x: Float, x0: Float, x1: Float, y0: Float, y1: Float ): Float {
+            return ( saturate(( x - x0 ) / ( x1 - x0 )) * ( y1 - y0 ) + y0 );
+        }
+
+        fun linearstep( a: Float, b: Float, x: Float ): Float {
+            return saturate( ( x - a ) / ( b - a ) );
+        }
+
+        fun smoothstep( a: Float, b: Float, x: Float ): Float {
+            val t = linearstep( a, b, x )
+            return t * t * ( 3.0f - 2.0f * t );}
+
+        fun smootherstep( a: Float, b: Float, x: Float ): Float{
+            val t = linearstep( a, b, x )
+            return t * t * t * ( t * ( t * 6.0f - 15.0f ) + 10.0f );
+        }
+
+    }
 }

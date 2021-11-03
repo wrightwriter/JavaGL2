@@ -1,6 +1,6 @@
 package _0_1.wrightgl.shader
 
-import _0_1.main.Glob
+import _0_1.main.Global
 import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL32
 import org.lwjgl.opengl.GL43
@@ -19,7 +19,7 @@ class Shader internal constructor(
     _fileName: String,
     _shaderType: Type? = null,
     _program: AbstractProgram,
-    _folderPath: String = Glob.engine.fileSystem.sketchResourcesFolder
+    _folderPath: String = Global.engine!!.fileSystem.sketchResourcesFolder
 ) {
     var programs: MutableList<AbstractProgram> = ArrayList()
     var pid = 0
@@ -138,8 +138,8 @@ class Shader internal constructor(
                 .toArray() as Array<File>
         }
 
-        val globalResFolder = Glob.engine.fileSystem.globalResourcesFolder
-        val sketchResFolder = Glob.engine.fileSystem.sketchResourcesFolder
+        val globalResFolder = Global.engine!!.fileSystem.globalResourcesFolder
+        val sketchResFolder = Global.engine!!.fileSystem.sketchResourcesFolder
 
         val globalIncludes : Array<File> = File(globalResFolder + "shaders/include").listFiles()
         var sketchIncludes :Array<File>? = null

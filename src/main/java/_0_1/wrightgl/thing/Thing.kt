@@ -6,27 +6,30 @@ import _0_1.math.Mat4.Companion.identityMatrix
 //import _0_1.wrightglPackage.WrightGL.VB.render
 import _0_1.wrightgl.shader.ProgRender
 import _0_1.math.Mat4
-import _0_1.main.Glob
+import _0_1.main.Global
 import _0_1.wrightgl.AbstractUniformsContainer
+import _0_1.wrightgl.Model
 import _0_1.wrightgl.WrightGL
 import _0_1.wrightgl.buffer.StorageBuffer
 import _0_1.wrightgl.buffer.VB
 import _0_1.wrightgl.fb.Texture
+import org.lwjgl.opengl.GL11.*
 import java.util.ArrayList
 import java.util.function.Consumer
 
-open class Thing protected constructor(): AbstractUniformsContainer {
-    override var uniformNumbers: HashMap<String, Any> = HashMap()
-    override var uniformTextures: HashMap<String, Texture> = HashMap()
-    override var uniformImages: HashMap<String, Texture> = HashMap()
-    override var boundSSBOs: HashMap<Int, StorageBuffer> = HashMap()
+open class Thing protected constructor(): AbstractUniformsContainer() {
 
     var vertexBuffers: MutableList<VB> = ArrayList()
         protected set
+    var models: MutableList<Model> = ArrayList()
+        protected set
+
     lateinit var modelMatrix: Mat4
 
     var culling: VB.CullMode = VB.CullMode.BACK
     var primitiveType: VB.PrimitiveType? = null
+    var depthWrite = true
+    var depthTest = true
 //    lateinit var modelMatrix: Mat4
 
 
@@ -46,8 +49,13 @@ open class Thing protected constructor(): AbstractUniformsContainer {
         vertexBuffers.add(_vertexBuffer)
         modelMatrix = identityMatrix
     }
+    constructor(_shaderProgram: ProgRender, _model: Model) : this() {
+        shaderProgram = _shaderProgram
+        models.add(_model)
+        modelMatrix = identityMatrix
+    }
 
-    fun render(
+    open fun render(
         _program: ProgRender = shaderProgram,
         _cb: Consumer<Thing>? = null,
         _primitiveType: VB.PrimitiveType? = primitiveType,
@@ -62,14 +70,29 @@ open class Thing protected constructor(): AbstractUniformsContainer {
         // Update model matrix
         if (callback != null) callback!!(this)
 
+        if (depthTest)
+            glEnable( GL_DEPTH_TEST );
+        else
+            glDisable( GL_DEPTH_TEST );
+
+//        glEnable(GL_DEPTH_TEST)
+//        glDepthFunc(GL_LESS)
+//        glEnable( GL_CULL_FACE)
+
         // Uniforms
-        Glob.engine.wgl.setUniform("M", modelMatrix.vals, WrightGL.UniformType.Matrix)
+        Global.engine.wgl.setUniform("M", modelMatrix)
 
         // Render
         for (buffer in vertexBuffers) {
             buffer.render(
                 _primitiveType,
-                _culling,
+                _culling ?: culling,
+            )
+        }
+        for (model in models) {
+            model.render(
+                _primitiveType,
+                _culling ?: culling,
             )
         }
     }

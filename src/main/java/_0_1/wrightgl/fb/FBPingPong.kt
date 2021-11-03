@@ -1,7 +1,6 @@
 package _0_1.wrightgl.fb
 
-import _0_1.main.Glob
-import _0_1.math.vector.Vec4
+import _0_1.main.Global
 
 class FBPingPong: FB{
 //    var pidBack: Int
@@ -13,8 +12,8 @@ class FBPingPong: FB{
     }
 
     constructor(
-        _width: Int = Glob.engine.res.x,
-        _height: Int = Glob.engine.res.x,
+        _width: Int = Global.engine!!.res.x,
+        _height: Int = Global.engine!!.res.x,
         texturesCnt: Int = 1,
         hasDepth: Boolean = false,
         internalFormat: Texture.InternalFormat = Texture.InternalFormat.RGBA32F,

@@ -1,5 +1,8 @@
 package _0_1.math.vector
 
+import _0_1.math.Mat4
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 class Vec3: Vec {
@@ -14,6 +17,9 @@ class Vec3: Vec {
     operator fun times(b: Float) = this.mul(b)
 
 
+    fun toIntVec(): IVec3{
+        return IVec3(x.toInt(),y.toInt(),z.toInt())
+    }
 
     var x: Float
         get():Float = x()
@@ -55,6 +61,42 @@ class Vec3: Vec {
     fun z(): Float {
         return vals[2]
     }
+
+//    fun rotateZ(){
+//        return this*
+//    }
+
+    fun rotX(rad: Float): Vec3{
+        return rotate(Mat4.Axis.X, rad)
+    }
+    fun rotY(rad: Float): Vec3{
+        return rotate(Mat4.Axis.Y, rad)
+    }
+    fun rotZ(rad: Float): Vec3{
+        return rotate(Mat4.Axis.Z, rad)
+    }
+    fun rotate(axis: Mat4.Axis, rad: Float): Vec3{
+        val ret = Vec3(this);
+
+        var axA = 0
+        var axB = 0
+        if (axis == Mat4.Axis.X){
+            axA = 1
+            axB = 2
+        } else if (axis == Mat4.Axis.Y){
+            axA = 0
+            axB = 2
+        } else if (axis == Mat4.Axis.Z){
+            axA = 0
+            axB = 1
+        }
+
+        ret[axA] = cos(rad) * this[axA] - sin(rad) * this[axB];
+        ret[axB] = sin(rad) * this[axA] + cos(rad) * this[axB];
+
+        return ret
+    }
+
 
     constructor(x: Int, y: Int, z: Int) {
         vals[0] = x.toFloat()
@@ -139,19 +181,19 @@ class Vec3: Vec {
 
     companion object {
         fun dot(a: Vec3, b: Vec3): Float {
-            return a.x() * b.x() + a.y() * b.y() + a.z() * b.z()
+            return a.x * b.x + a.y * b.y + a.z * b.z
         }
 
         fun cross(a: Vec3, b: Vec3): Vec3 {
-            val res = FloatArray(3)
-            res[0] = a.y() * b.z() - a.z() * b.y()
-            res[1] = a.z() * b.x() - a.x() * b.z()
-            res[2] = a.x() * b.y() - a.y() * b.x()
-            return Vec3(res)
+            return Vec3(
+            a.y() * b.z() - a.z() * b.y(),
+            a.z() * b.x() - a.x() * b.z(),
+            a.x() * b.y() - a.y() * b.x(),
+            )
         }
 
         fun length(a: Vec3): Float {
-            return sqrt(dot(a, a).toDouble()).toFloat()
+            return java.lang.Math.sqrt(dot(a, a).toDouble()).toFloat()
         }
 
         fun distance(a: Vec3, b: Vec3): Float {

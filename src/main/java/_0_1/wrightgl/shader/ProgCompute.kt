@@ -1,27 +1,22 @@
 package _0_1.wrightgl.shader
 
-import _0_1.main.Glob
-import _0_1.math.vector.IVec2
+import _0_1.main.Global
 import _0_1.math.vector.IVec3
-import _0_1.wrightgl.buffer.StorageBuffer
-import _0_1.wrightgl.fb.FB
-import _0_1.wrightgl.fb.Texture
-import _0_1.wrightgl.buffer.VB
 import org.lwjgl.opengl.GL20
-import org.lwjgl.opengl.GL42
-import org.lwjgl.opengl.GL43
 import org.lwjgl.opengl.GL46
-import java.util.function.Consumer
-import kotlin.math.sqrt
 
-class ProgCompute(_fileNameComp: String) : AbstractProgram() {
+class ProgCompute(
+    _fileNameComp: String,
+    _folderPath: String = Global.engine!!.fileSystem.sketchResourcesFolder
+) : AbstractProgram() {
     var localGroupSize: IVec3 = IVec3(0,0,0)
 
     var compShader: Shader? = null
     init {
-        compShader = Shader(_fileNameComp, Shader.Type.COMPUTE_SHADER, this)
+        compShader = Shader(_fileNameComp, Shader.Type.COMPUTE_SHADER, this, _folderPath)
         link()
     }
+
     override fun link(): Boolean{
         val successfulLinking: Boolean
 

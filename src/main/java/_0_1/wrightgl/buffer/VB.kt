@@ -5,60 +5,23 @@ import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL32.GL_TRIANGLES_ADJACENCY
 import org.lwjgl.opengl.GL32.GL_TRIANGLE_STRIP_ADJACENCY
 import org.lwjgl.opengl.GL40.GL_PATCHES
-import java.lang.Float
+import java.nio.FloatBuffer
 
-class VB(
-    _geometry: FloatArray,
-    _signature: IntArray,
-    var primitiveType: PrimitiveType = PrimitiveType.TRIANGLES,
-): AbstractBuffer() {
-    var vaoPid: Int
+open class VB protected constructor( ): AbstractBuffer() {
+    var vaoPid: Int = 0
+        protected set
 //    var data: FloatBuffer? = null
+    var primitiveType: PrimitiveType = PrimitiveType.TRIANGLES
+    var mapped: Boolean = true
+        protected set
 
 
-    companion object {
-        lateinit var quadVB: VB
-            internal set
-    }
 
-    init {
-        signature = _signature
-        data = _geometry.clone()
+    var gpuBuff: FloatBuffer? = null
 
-        singleVertElementsCnt = 0
-        for (j in signature) {
-            singleVertElementsCnt += j
-        }
-
-        totalVertCnt = _geometry.size / singleVertElementsCnt
-
-        val singleVertSizeBytes: Int = singleVertElementsCnt * Float.BYTES
-        val totalVertSizeBytes: Int = singleVertSizeBytes * totalVertCnt
-
-        pid = GL46.glCreateBuffers()
-        GL46.glNamedBufferStorage(pid, _geometry, GL46.GL_DYNAMIC_STORAGE_BIT)
-//        GL46.glNamedBufferStorage(vboPid, _geometry, 0)
-
-        vaoPid = GL46.glCreateVertexArrays()
-        val bindIdx = 0
-
-        GL46.glVertexArrayVertexBuffer(vaoPid, bindIdx, pid, 0, singleVertSizeBytes)
-
-        var attribOffset: Int = 0
-        for (i in signature.indices) {
-            GL46.glEnableVertexArrayAttrib(vaoPid, i)
-            GL46.glVertexArrayAttribFormat(
-                vaoPid, i, signature[i], Type.FLOAT.value,
-                false, attribOffset
-            )
-            GL46.glVertexArrayAttribBinding(vaoPid,i, bindIdx)
-            attribOffset += signature[i] * Float.BYTES
-        }
-
-
-//        GL46.glBindVertexArray(0)
-//        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
-    }
+//    val flags = GL46.GL_MAP_READ_BIT  or GL46.GL_MAP_PERSISTENT_BIT or GL_MAP_FLUSH_EXPLICIT_BIT
+    open var flags = 0
+        protected set
 
     enum class CullMode(val value: Int) {
         FRONT(GL11.GL_FRONT),
@@ -80,22 +43,117 @@ class VB(
         PATCHES(GL_PATCHES);
     }
 
+    companion object {
+        lateinit var quadVB: VB
+            internal set
+    }
+
+    constructor(
+        _geometry: FloatArray,
+        _signature: IntArray,
+        _primitiveType: PrimitiveType = PrimitiveType.TRIANGLES,
+        _mapped: Boolean = false,
+        _flags: Int = GL46.GL_MAP_WRITE_BIT or GL46.GL_MAP_READ_BIT or GL46.GL_MAP_PERSISTENT_BIT or GL46.GL_MAP_COHERENT_BIT,
+    ) : this() {
+        signature = _signature
+        data = _geometry.clone()
+
+        singleVertElementsCnt = 0
+        for (j in signature) {
+            singleVertElementsCnt += j
+        }
+
+        totalVertCnt = data.size / singleVertElementsCnt
+
+        singleVertSizeBytes  = singleVertElementsCnt * Float.SIZE_BYTES
+        totalSizeBytes = singleVertSizeBytes * totalVertCnt
+
+
+        primitiveType = _primitiveType
+        createVBOandVAO( )
+
+
+        if (_mapped){
+            flags = _flags
+            mapGpuBuff(
+                totalVertCnt,
+                flags
+            )
+        }
+
+    }
+
+    protected fun createVBOandVAO( ){
+        pid = GL46.glCreateBuffers()
+
+        vaoPid = GL46.glCreateVertexArrays()
+        GL46.glNamedBufferStorage(pid, data, GL46.GL_DYNAMIC_STORAGE_BIT or flags )
+
+        val bindIdx = 0
+
+        GL46.glVertexArrayVertexBuffer(vaoPid, bindIdx, pid, 0, singleVertSizeBytes)
+
+        var attribOffset: Int = 0
+        for (i in signature.indices) {
+            GL46.glEnableVertexArrayAttrib(vaoPid, i)
+            GL46.glVertexArrayAttribFormat(
+                vaoPid, i, signature[i], Type.FLOAT.value,
+                false, attribOffset
+            )
+            GL46.glVertexArrayAttribBinding(vaoPid,i, bindIdx)
+            attribOffset += signature[i] * Float.SIZE_BYTES
+        }
+    }
+
+    protected fun mapGpuBuff(
+        vertCnt: Int,
+        _flags: Int,
+    ){
+
+        val buffByteSz = vertCnt*singleVertSizeBytes
+        gpuBuff = GL46.glMapNamedBufferRange(
+            pid,
+            0,
+            buffByteSz.toLong(),
+            _flags
+        )!!.asFloatBuffer()
+        // -- DONT NEED THESE, TEST -- //
+        GL45.glFlushMappedNamedBufferRange(pid, 0, buffByteSz.toLong())
+        GL42.glMemoryBarrier(GL44.GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT)
+        GL42.glMemoryBarrier(GL42.GL_ALL_BARRIER_BITS)
+
+
+        if(gpuBuff== null){
+            print("aaa")
+        }
+        val err = GL11.glGetError()
+        if(err != GL46.GL_NO_ERROR){
+            print("aaaa")
+        }
+
+        mapped = true
+    }
+
     fun render(
         _primitiveType: PrimitiveType? = null,
         _culling: CullMode? = null,
+        _instanceCnt: Int = 1,
     ) {
-//        val oldCulling = GL11.glGetInteger(GL11.GL_CULL_FACE_MODE)
         if (_culling != null)
             GL46.glCullFace(_culling.value)
 
         GL46.glBindVertexArray(vaoPid)
-        if (_primitiveType != null)
-            GL46.glDrawArrays(_primitiveType.value, 0, totalVertCnt)
+
+        var primitives = primitiveType
+        if (_primitiveType != null )
+            primitives = _primitiveType
+
+        if (_instanceCnt > 1)
+            GL46.glDrawArraysInstanced(primitives.value, 0, totalVertCnt, _instanceCnt)
         else
-            GL46.glDrawArrays(primitiveType.value, 0, totalVertCnt)
+            GL46.glDrawArrays(primitives.value, 0, totalVertCnt)
 
         GL46.glBindVertexArray(0)
-//        GL46.glCullFace(oldCulling)
     }
 
 

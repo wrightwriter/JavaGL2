@@ -11,6 +11,9 @@ class Vec4: Vec {
     operator fun minus(b: Float) = this.sub(b)
     operator fun times(b: Float) = this.mul(b)
 
+//    fun toIntVec(): IVec4{
+//        return IVec4(x,y)
+//    }
 
     var x: Float
         get():Float = x()

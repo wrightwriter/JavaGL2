@@ -1,29 +1,18 @@
 package _0_1.wrightgl.Pass
 
-import _0_1.main.Glob
-import _0_1.wrightgl.AbstractUniformsContainer
-import _0_1.wrightgl.buffer.StorageBuffer
+import _0_1.main.Global
 import _0_1.wrightgl.buffer.VB
 import _0_1.wrightgl.fb.FB
-import _0_1.wrightgl.fb.Texture
 import _0_1.wrightgl.shader.ProgFX
 import _0_1.wrightgl.shader.ProgRender
-import org.lwjgl.opengl.GL11.GL_DEPTH_TEST
-import org.lwjgl.opengl.GL11.glDisable
+import org.lwjgl.opengl.GL11.*
 import java.util.function.Consumer
 
-open class FXPass protected constructor() : AbstractPass(), AbstractUniformsContainer {
-
-    override var uniformNumbers: HashMap<String, Any> = HashMap()
-    override var uniformTextures: HashMap<String, Texture> = HashMap()
-    override var uniformImages: HashMap<String, Texture> = HashMap()
-    override var boundSSBOs: HashMap<Int, StorageBuffer> = HashMap()
-
-
+open class PassFX protected constructor() : AbstractPass(){
 
     constructor(
         _fileNameFrag: String,
-        _folderPath: String = Glob.engine.fileSystem.sketchResourcesFolder
+        _folderPath: String = Global.engine.fileSystem.sketchResourcesFolder
     ) : this() {
         shaderProgram = ProgFX(
             _fileNameFrag,
@@ -38,10 +27,15 @@ open class FXPass protected constructor() : AbstractPass(), AbstractUniformsCont
     // TODO
     // TOUCHES GL_DEPTH_TEST STATE!!
     open fun run(
-        _outputFramebuffer: FB,
-        cb: Consumer<FXPass>? = null
+        _outputFramebuffer: FB = Global.engine.wgl.currDrawFB,
+        _depthTest: Boolean = false,
+        cb: Consumer<PassFX>? = null
     ) {
-        glDisable(GL_DEPTH_TEST)
+        if (_depthTest == false)
+            glDisable(GL_DEPTH_TEST)
+        else
+            glEnable(GL_DEPTH_TEST)
+
         shaderProgram.use()
         cb?.accept(this)
         FB.bind(FB.Target.DRAW, _outputFramebuffer)
@@ -54,15 +48,21 @@ open class FXPass protected constructor() : AbstractPass(), AbstractUniformsCont
     open fun run(
         _inputFramebuffer: FB,
         _outputFramebuffer: FB,
-        cb: Consumer<FXPass>? = null
+        _depthTest: Boolean = false,
+        cb: Consumer<PassFX>? = null
     ) {
-        glDisable(GL_DEPTH_TEST)
+        if (_depthTest == false)
+            glDisable(GL_DEPTH_TEST)
+        else
+            glEnable(GL_DEPTH_TEST)
         shaderProgram.use()
         cb?.accept(this)
         _inputFramebuffer.setUniformTextures("s_Input")
         FB.bind(FB.Target.DRAW, _outputFramebuffer)
         setCurrObjectUniforms()
-        VB.quadVB.render()
+        VB.quadVB.render(
+
+        )
     }
 }
 

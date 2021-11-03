@@ -1,6 +1,6 @@
 package _0_1.wrightgl.shader
 
-import _0_1.main.Glob
+import _0_1.main.Global
 import org.lwjgl.opengl.GL20
 
 
@@ -9,7 +9,7 @@ open class ProgRender protected constructor() : AbstractProgram(){
         _fileNameVert: String,
         _fileNameFrag: String,
         _fileNameGeom: String? = null,
-        _folderPath: String = Glob.engine!!.fileSystem.sketchResourcesFolder
+        _folderPath: String = Global.engine!!.fileSystem.sketchResourcesFolder
     ) : this() {
         fragShader = Shader(_fileNameFrag, Shader.Type.FRAGMENT_SHADER, this, _folderPath)
         vertShader = Shader(_fileNameVert, Shader.Type.VERTEX_SHADER, this, _folderPath)

@@ -1,21 +1,26 @@
 package _0_1.wrightgl
 
 import _0_1.engine.Engine
-import _0_1.main.Glob
+import _0_1.main.Global
 import _0_1.math.Geometry
+import _0_1.math.Mat4
+import _0_1.math.vector.IVec
+import _0_1.math.vector.Vec
 import org.lwjgl.nanovg.NVGColor
 import _0_1.wrightgl.buffer.VB
 import _0_1.wrightgl.fb.FB
 import _0_1.wrightgl.shader.AbstractProgram
-import _0_1.wrightgl.shader.ProgRender
 import org.lwjgl.nanovg.NanoVGGL3
 import org.lwjgl.opengl.*
 import org.lwjgl.opengl.GL11.glEnable
 import org.lwjgl.opengl.GL32.GL_PROGRAM_POINT_SIZE
+import org.lwjgl.opengl.GL43.*
 
 //import static org.lwjgl.opengl.GL11.*;
 //import static org.lwjgl.opengl.GL30.*;
-class WrightGL(private val engine: Engine) {
+class WrightGL(
+    private val engine: Engine
+    ) {
     var currProgram: AbstractProgram? = null
         internal set
     var currReadFB: FB
@@ -40,12 +45,28 @@ class WrightGL(private val engine: Engine) {
     init {
 
 
+
         currDrawFB = FB.defaultFB
         currReadFB = FB.defaultFB
 
         // Setup
         GL.getCapabilities()
 
+        // Debug
+        if (engine.engineSettings.openGLDebugEnabled){
+            GL11.glEnable(GL43.GL_DEBUG_OUTPUT)
+            GL11.glEnable(GL43.GL_DEBUG_OUTPUT_SYNCHRONOUS)
+            GL43.glDebugMessageCallback(
+                { source: Int, type: Int, id: Int, severity: Int, length: Int, message: Long, userParam: Long ->
+                    assert(false)
+                    System.out.printf("ERROOOOOOOOOORRR")
+                }, 0)
+//            GL43.glDebugMessageControl(GL11.GL_DONT_CARE, GL11.GL_DONT_CARE, GL11.GL_DONT_CARE, 0, true)
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0,  true);
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0,  true);
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, true);
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0,  true);
+        }
 
         // Nanovg
 //        engine.wgl.gl
@@ -58,17 +79,6 @@ class WrightGL(private val engine: Engine) {
         }
         nvgColor = NVGColor.create()
 
-        // Debug
-        if (engine.engineSettings.openGLDebugEnabled){
-            GL11.glEnable(GL43.GL_DEBUG_OUTPUT)
-            GL11.glEnable(GL43.GL_DEBUG_OUTPUT_SYNCHRONOUS)
-            GL43.glDebugMessageCallback(
-                { source: Int, type: Int, id: Int, severity: Int, length: Int, message: Long, userParam: Long ->
-                assert(false)
-                System.out.printf("ERROOOOOOOOOORRR")
-            }, 0)
-            GL43.glDebugMessageControl(GL11.GL_DONT_CARE, GL11.GL_DONT_CARE, GL11.GL_DONT_CARE, 0, true)
-        }
 
         // Create VAO
 //        int vao = glCreateVertexArrays();
@@ -128,20 +138,20 @@ class WrightGL(private val engine: Engine) {
     fun setSharedUniforms() {
         // Set uniforms
 //        val Time = (System.currentTimeMillis() - Glob.engine.timeStart).toFloat() / 1000f
-        engine.wgl.setUniform("Time", Glob.engine.time, UniformType.Float)
-        engine.wgl.setUniform("u_deltaTime", Glob.engine.time, UniformType.Float)
+        engine.wgl.setUniform("Time", Global.engine.time)
+        engine.wgl.setUniform("u_deltaTime", Global.engine.time)
 
-        engine.wgl.setUniform("u_mousePos", engine.io.mousePos.vals)
-        engine.wgl.setUniform("u_deltaMousePos", engine.io.deltaMousePos.vals)
+        engine.wgl.setUniform("u_mousePos", engine.io.mousePos)
+        engine.wgl.setUniform("u_deltaMousePos", engine.io.deltaMousePos)
         engine.wgl.setUniform("u_RMBDown", if(engine.io.RMBDown == true) 1.0f else 0.0f )
         engine.wgl.setUniform("u_LMBDown", if(engine.io.LMBDown == true) 1.0f else 0.0f )
 //        engine.wgl.setUniform("u_RMBDown", if(engine.io.LMBDown == true) 1.0f else 0.0f )
 //        engine.wgl.setUniform("u_RMBDown", if(engine.io.LMBDown == true) 1.0f else 0.0f )
 
-        val res = floatArrayOf(engine.res.x.toFloat(), Glob.engine.res.y.toFloat())
-        engine.wgl.setUniform("R", res, UniformType.Float)
-        engine.wgl.setUniform("V", engine.camera.viewMatrix.vals, UniformType.Matrix)
-        engine.wgl.setUniform("P", engine.camera.projectionMatrix.vals, UniformType.Matrix)
+        engine.wgl.setUniform("R", engine.res.toFloatVec())
+        engine.wgl.setUniform("V", engine.camera.viewMatrix)
+        engine.wgl.setUniform("invV", engine.camera.inverseViewMatrix)
+        engine.wgl.setUniform("P", engine.camera.projectionMatrix)
     }
 
     enum class UniformType {
@@ -154,9 +164,6 @@ class WrightGL(private val engine: Engine) {
     }
     fun setUniform(_name: String?, _value: IntArray) {
         val loc = GL20.glGetUniformLocation(currProgram!!.pid, _name)
-        if (loc < 0) {
-//            System.out.println("Error: loc location not found.");
-        }
         val len = _value.size
         if (len == 1) {
             GL20.glUniform1i(loc, _value[0])
@@ -169,46 +176,39 @@ class WrightGL(private val engine: Engine) {
         }
 
     }
-
-    fun setUniform(_name: String?, _value: FloatArray, _type: UniformType = UniformType.Float) {
+    fun setUniform(_name: String?, _value: FloatArray) {
         val loc = GL20.glGetUniformLocation(currProgram!!.pid, _name)
-
         val len = _value.size
-        if (_type == UniformType.Matrix) {
-            GL20.glUniformMatrix4fv(loc, false, _value)
-        } else if (_type == UniformType.Int) {
-            if (len == 1) {
-                GL20.glUniform1i(loc, _value[0].toInt())
-            } else if (len == 2) {
-                GL20.glUniform2i(loc, _value[0].toInt(), _value[1].toInt())
-            } else if (len == 3) {
-                GL20.glUniform3i(loc, _value[0].toInt(), _value[1].toInt(), _value[2].toInt())
-            } else if (len == 4) {
-                GL20.glUniform4i(loc, _value[0].toInt(), _value[1].toInt(), _value[2].toInt(), _value[3].toInt())
-            }
-    } else if (_type == UniformType.Float) {
-            if (len == 1) {
-                GL20.glUniform1f(loc, _value[0])
-            } else if (len == 2) {
-                GL20.glUniform2f(loc, _value[0], _value[1])
-            } else if (len == 3) {
-                GL20.glUniform3f(loc, _value[0], _value[1], _value[2])
-            } else if (len == 4) {
-                GL20.glUniform4f(loc, _value[0], _value[1], _value[2], _value[3])
-            }
-    }
-}
-
-    fun setUniform(_name: String?, _value: Float, _type: UniformType = UniformType.Float) {
-        val loc = GL20.glGetUniformLocation(currProgram!!.pid, _name)
-
-        if (_type == UniformType.Matrix) {
-            // TODO: THROW ERROR
-        } else if (_type == UniformType.Int) {
-            GL20.glUniform1i(loc, _value.toInt())
-        } else if (_type == UniformType.Float) {
-            GL20.glUniform1f(loc, _value)
+        if (len == 1) {
+            GL20.glUniform1f(loc, _value[0])
+        } else if (len == 2) {
+            GL20.glUniform2f(loc, _value[0], _value[1])
+        } else if (len == 3) {
+            GL20.glUniform3f(loc, _value[0], _value[1], _value[2])
+        } else if (len == 4) {
+            GL20.glUniform4f(loc, _value[0], _value[1], _value[2], _value[3])
         }
+    }
+
+    fun setUniform(_name: String?, _value: Vec) {
+        setUniform(_name, _value.vals)
+    }
+    fun setUniform(_name: String?, _value: IVec) {
+        setUniform(_name , _value.vals)
+    }
+
+    fun setUniform(_name: String?, _value: Mat4) {
+        val loc = GL20.glGetUniformLocation(currProgram!!.pid, _name)
+        GL46.glUniformMatrix4fv(loc, false, _value.vals)
+    }
+
+    fun setUniform(_name: String?, _value: Float) {
+        val loc = GL20.glGetUniformLocation(currProgram!!.pid, _name)
+        GL20.glUniform1f(loc, _value)
+    }
+    fun setUniform(_name: String?, _value: Int) {
+        val loc = GL20.glGetUniformLocation(currProgram!!.pid, _name)
+        GL20.glUniform1i(loc, _value)
     }
 
 //    fun setUniformTexture(

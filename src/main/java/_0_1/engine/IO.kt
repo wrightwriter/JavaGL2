@@ -55,15 +55,16 @@ class IO {
 
         companion object {
             private val mapKeyCodeToEnum = HashMap<Int, Key>()
-            fun getKey(value: Int): Key? {
-                return mapKeyCodeToEnum[value]
-            }
-
             init {
                 for (d in values()) {
                     mapKeyCodeToEnum[d.selfValue] = d
                 }
             }
+            fun getKey(value: Int): Key? {
+                return mapKeyCodeToEnum[value]
+            }
+
+
         }
 
         class State {

@@ -1,6 +1,6 @@
 package _0_1.engine.gui
 
-import _0_1.main.Glob
+import _0_1.main.Global
 
 abstract class AbstractGUISetting protected constructor (){
     abstract var name: String
@@ -9,7 +9,7 @@ abstract class AbstractGUISetting protected constructor (){
         protected set
 
     init{
-        Glob.engine.gui.settings.add(this)
+        Global.engine!!.gui.settings.add(this)
     }
     abstract fun get(): Any
 }

@@ -1,10 +1,9 @@
 package _0_1.wrightgl.fb
 
-import _0_1.main.Glob
+import _0_1.main.Global
 import _0_1.math.vector.IVec2
 import _0_1.math.vector.Vec4
 import org.lwjgl.opengl.*
-import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL30.*
 import org.lwjgl.opengl.GL45.glCheckNamedFramebufferStatus
 import java.util.ArrayList
@@ -61,11 +60,11 @@ open class FB {
 
         fun bind(target: Target, fb: FB) {
             when (target) {
-                Target.READ -> Glob.engine!!.wgl.currReadFB = fb
-                Target.DRAW -> Glob.engine!!.wgl.currDrawFB = fb
+                Target.READ -> Global.engine!!.wgl.currReadFB = fb
+                Target.DRAW -> Global.engine!!.wgl.currDrawFB = fb
                 Target.FRAMEBUFFER -> {
-                    Glob.engine!!.wgl.currReadFB = fb
-                    Glob.engine!!.wgl.currDrawFB = Glob.engine!!.wgl.currReadFB
+                    Global.engine!!.wgl.currReadFB = fb
+                    Global.engine!!.wgl.currDrawFB = Global.engine!!.wgl.currReadFB
                 }
             }
             GL30.glBindFramebuffer(target.value, fb.pid)
@@ -86,6 +85,7 @@ open class FB {
                     GL20.glDrawBuffers(attachments)
                     GL46.glNamedFramebufferDrawBuffer(fb.pid, GL11.GL_BACK)
                 }
+
             }
         }
 
@@ -99,7 +99,7 @@ open class FB {
             val pidRead = readFB.pid
             val pidWrite = writeFb.pid
 //            val screenRes = IVec2(Global.engine!!.res.x, Global.engine!!.resY)
-            val screenRes =  Glob.engine!!.res.copy()
+            val screenRes =  Global.engine.res.copy()
             val resRead: IVec2 = if (readFB === defaultFB) screenRes else readFB.textures[0].res.xy
             val resWrite = if (writeFb === defaultFB) screenRes else writeFb.textures[0].res.xy
 //            GL30.glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, pidRead)
@@ -146,8 +146,8 @@ open class FB {
 
 
     constructor(
-        _width: Int = Glob.engine.res.x,
-        _height: Int = Glob.engine.res.x,
+        _width: Int = Global.engine.res.x,
+        _height: Int = Global.engine.res.y,
         texturesCnt: Int = 1,
         hasDepth: Boolean = false,
         internalFormat: Texture.InternalFormat = Texture.InternalFormat.RGBA32F,

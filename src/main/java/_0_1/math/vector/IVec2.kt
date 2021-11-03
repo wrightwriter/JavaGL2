@@ -12,7 +12,6 @@ class IVec2: IVec {
     operator fun times(b: Int) = this.mul(b)
 
 
-
     var x: Int
         get():Int = x()
         set(value) {this[0] = value}
@@ -26,6 +25,11 @@ class IVec2: IVec {
         get():IVec2 = IVec2(y,x)
         set(v) {y = v[0]; x = v[1];}
 
+
+
+    fun toFloatVec(): Vec2{
+        return Vec2(x,y)
+    }
 
     fun x(): Int {
         return vals[0]

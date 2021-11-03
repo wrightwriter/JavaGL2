@@ -1,17 +1,11 @@
 package _0_1.wrightgl.fb
 
-import _0_1.main.Glob
-import _0_1.math.vector.IVec2
+import _0_1.main.Global
 import _0_1.math.vector.IVec3
 import _0_1.wrightgl.shader.AbstractProgram
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.*
-import org.lwjgl.opengl.GL11.glReadPixels
-import org.lwjgl.opengl.GL14.GL_DEPTH_COMPONENT16
-import org.lwjgl.opengl.GL14.GL_DEPTH_COMPONENT32
-import org.lwjgl.opengl.GL30.GL_DEPTH_COMPONENT32F
 import org.lwjgl.opengl.GL45.glTextureParameteri
-import org.lwjgl.opengl.GL45.glTextureStorage2D
 import org.lwjgl.stb.STBImage
 import org.lwjgl.stb.STBImageWrite.stbi_write_png
 import java.nio.ByteBuffer
@@ -81,8 +75,8 @@ class Texture {
 
     constructor(
         data: FloatBuffer? = null,
-        resx: Int = Glob.engine.res.x,
-        resy: Int = Glob.engine.res.y,
+        resx: Int = Global.engine.res.x,
+        resy: Int = Global.engine.res.y,
         internalFormat: InternalFormat? = InternalFormat.RGBA32F,
         format: Format? = Format.RGBA,
         type: Type? = Type.FLOAT
@@ -197,10 +191,10 @@ class Texture {
         stbi_write_png(_filePath, res.x, res.y, channelCnt!!, pixels, 0)
     }
 
-    constructor(_filePath: String, _folderPath: String = Glob.engine.fileSystem.sketchResourcesFolder) {
+    constructor(_filePath: String, _folderPath: String = Global.engine!!.fileSystem.sketchResourcesFolder) {
         loadFile(_filePath, _folderPath)
     }
-    fun loadFile(_filePath: String, _folderPath: String = Glob.engine.fileSystem.sketchResourcesFolder): Boolean{
+    fun loadFile(_filePath: String, _folderPath: String = Global.engine!!.fileSystem.sketchResourcesFolder): Boolean{
         delete()
         var successfulCompilation: Boolean = true
 
@@ -267,12 +261,17 @@ class Texture {
     }
 
 
-    fun setUniformWritableImage(name: String, program: AbstractProgram = Glob.engine.wgl.currProgram!!) {
-        Glob.engine.wgl.currImageBindNumber++
-        val bindNumber = Glob.engine.wgl.currImageBindNumber
+    fun setUniformWritableImage(name: String, program: AbstractProgram = Global.engine!!.wgl.currProgram!!) {
+        val bindNumber = Global.engine!!.wgl.currImageBindNumber++
         setUniformWritableImage(bindNumber, name, program)
     }
-    fun setUniformWritableImage(_bindNumber: Int = -1, name: String, program: AbstractProgram? = Glob.engine.wgl.currProgram) {
+
+    fun setUniform(name: String, program: AbstractProgram = Global.engine!!.wgl.currProgram!!) {
+        val bindNumber = Global.engine.wgl.currTexBindNumber++
+        setUniform(bindNumber, name, program)
+    }
+
+    fun setUniformWritableImage(_bindNumber: Int = -1, name: String, program: AbstractProgram? = Global.engine!!.wgl.currProgram) {
         val loc = GL20.glGetUniformLocation(program!!.pid, name)
         GL42.glBindImageTexture(
             _bindNumber,
@@ -285,13 +284,8 @@ class Texture {
         )
         GL20.glUniform1i(loc, _bindNumber)
     }
-    fun setUniform(name: String, program: AbstractProgram = Glob.engine.wgl.currProgram!!) {
-        Glob.engine.wgl.currTexBindNumber++
-        val bindNumber = Glob.engine.wgl.currTexBindNumber
-        setUniform(bindNumber, name, program)
-    }
 
-    fun setUniform(_bindNumber: Int = -1, name: String, program: AbstractProgram = Glob.engine.wgl.currProgram!!) {
+    fun setUniform(_bindNumber: Int = -1, name: String, program: AbstractProgram = Global.engine!!.wgl.currProgram!!) {
 //        val bindNumber = _bindNumber
         val loc = GL20.glGetUniformLocation(program.pid, name)
         GL46.glBindTextureUnit(_bindNumber,pid)

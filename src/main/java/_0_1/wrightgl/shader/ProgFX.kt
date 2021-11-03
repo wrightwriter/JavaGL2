@@ -1,11 +1,11 @@
 package _0_1.wrightgl.shader
 
-import _0_1.main.Glob
+import _0_1.main.Global
 
-class ProgFX( ) : ProgRender(){
+class ProgFX private constructor( ) : ProgRender(){
     constructor(
         _fileNameFrag: String,
-        _folderPath: String = Glob.engine!!.fileSystem.sketchResourcesFolder
+        _folderPath: String = Global.engine.fileSystem.sketchResourcesFolder
     ) : this() {
         fragShader = Shader(
             _fileNameFrag,
@@ -16,9 +16,8 @@ class ProgFX( ) : ProgRender(){
             "quad.vp",
             Shader.Type.VERTEX_SHADER,
             this,
-            Glob.engine!!.fileSystem.globalResourcesFolder)
+            Global.engine.fileSystem.globalResourcesFolder)
 
         link()
     }
-
 }

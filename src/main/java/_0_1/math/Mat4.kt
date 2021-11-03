@@ -9,7 +9,7 @@ class Mat4(_vals: FloatArray) {
     @JvmField
     var vals = FloatArray(4 * 4)
     init {
-        vals = _vals
+        vals = _vals.clone()
     }
 
     operator fun get(i: Int):Float = vals[i]
@@ -17,6 +17,21 @@ class Mat4(_vals: FloatArray) {
     operator fun set(i: Int, v: Float) { vals[i] = v}
     operator fun times(b: Mat4) = Mat4.multiply(this,b)
 //    operator fun timesAssign(b: Mat4) {this.vals = Mat4.multiply(b, this).vals}
+    fun rotateX( radians: Float): Mat4{
+        return getRotationMatrix(Axis.X, radians) * this
+    }
+    fun rotateY( radians: Float): Mat4{
+        return getRotationMatrix(Axis.Y, radians)* this
+    }
+    fun rotateZ( radians: Float): Mat4{
+        return (getRotationMatrix(Axis.Z, radians)* this)
+    }
+    fun translate( translation: Vec3): Mat4{
+        return getTranslationMatrix(translation) * this
+    }
+    fun scale( sc: Vec3): Mat4{
+        return getScaleMatrix(sc) * this
+    }
 
     fun copy(): Mat4 {
         return Mat4(vals)
@@ -24,6 +39,10 @@ class Mat4(_vals: FloatArray) {
 
     fun at(row: Int, col: Int): Float {
         return vals[row * 4 + col]
+    }
+
+    fun inverse(): Mat4 {
+        return Companion.inverse(this)!!
     }
 
     enum class Axis {
@@ -154,7 +173,9 @@ class Mat4(_vals: FloatArray) {
 
         fun getTranslationMatrix(translation: Vec3): Mat4 {
             val a = floatArrayOf(
-                1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f,
+                1f, 0f, 0f, 0f,
+                0f, 1f, 0f, 0f,
+                0f, 0f, 1f, 0f,
                 -translation.x(), -translation.y(), -translation.z(), 1f
             )
             return Mat4(a)
@@ -203,7 +224,8 @@ class Mat4(_vals: FloatArray) {
             // TODO: check if this works.
 //            val dir = Vec3.normalize(lookAt - eye)
             val dir = Vec3.normalize(eye.sub(lookAt))
-            val right = Vec3.normalize(Vec3.cross(up, dir))
+//            val right = Vec3.normalize(Vec3.cross(up, dir))
+            val right = (Vec3.cross(up, dir))
             val top = Vec3.cross(dir, right)
             val lookAtMat = floatArrayOf(
                 right.x, right.y, right.z, 0.0f,
@@ -213,7 +235,8 @@ class Mat4(_vals: FloatArray) {
             )
             return Mat4(lookAtMat)
         }
-        fun getLookAtMatrix(
+
+        fun getLookAtMatrixCatUntil(
             eye: Vec3,
             lookAt: Vec3,
             up: Vec3 = Vec3(0,1,0)
@@ -222,9 +245,78 @@ class Mat4(_vals: FloatArray) {
 //            val dir = Vec3.normalize(lookAt - eye)
             val dir = Vec3.normalize(lookAt.sub(eye))
 //            val right = Vec3.normalize(Vec3.cross(up, dir))
-            val right = Vec3.normalize(Vec3.cross(dir, up))
+            val sid = Vec3.normalize(Vec3.cross(dir, up))
+            val top = Vec3.normalize(Vec3.cross(sid, dir))
+//                sid = MathCat.vecAdd(
+//                    MathCat.vecScale( Math.cos( rot || 0.0 ), sid ),
+//                    MathCat.vecScale( Math.sin( rot || 0.0 ), top )
+//                );
+//                top = MathCat.vec3Cross( sid, dir );
+
+            return Mat4(
+                    floatArrayOf( sid[ 0 ], top[ 0 ], dir[ 0 ], 0.0f,
+                    sid[ 1 ], top[ 1 ], dir[ 1 ], 0.0f,
+                    sid[ 2 ], top[ 2 ], dir[ 2 ], 0.0f,
+                    -sid[ 0 ] * eye[ 0 ] - sid[ 1 ] * eye[ 1 ] - sid[ 2 ] * eye[ 2 ],
+                    -top[ 0 ] * eye[ 0 ] - top[ 1 ] * eye[ 1 ] - top[ 2 ] * eye[ 2 ],
+                    -dir[ 0 ] * eye[ 0 ] - dir[ 1 ] * eye[ 1 ] - dir[ 2 ] * eye[ 2 ],
+                    1.0f )
+            )
+        }
+        fun getLookAtMatrix(
+            eye: Vec3,
+            lookAt: Vec3,
+            up: Vec3 = Vec3(0,1,0)
+        ): Mat4 {
+            val dir = Vec3.normalize(eye.sub(lookAt))
+            val right = Vec3.normalize(Vec3.cross(up, dir))
+            val top = Vec3.normalize(Vec3.cross(dir, right))
+            val lookAtMat = floatArrayOf(
+                right.x, right.y, right.z, 0.0f,
+                top.x, top.y, top.z, 0.0f,
+                dir.x, dir.y, dir.z, 0.0f,
+                Vec3.dot(right.negative(),eye), Vec3.dot(top.negative(),eye), Vec3.dot(dir.negative(),eye), 1.0f
+            )
+            return Mat4(lookAtMat)
+        }
+//        fun getLookAtMatJoml(
+//            lookAt: Vec3,
+//            eye: Vec3,
+//            up: Vec3 = Vec3(0,1,0)
+//        ): Mat4 {
+//            return getLookAtOldMatrix(
+//                Vec3(eye.x(), eye.y(), eye.z()),
+//                Vec3(lookAt.x(), lookAt.y(), lookAt.z()),
+//                Vec3(up.x(), up.y(), up.z()),
+//            )
+//        }
+//            val dir = Vec3.normalize(lookAt - eye)
+//            val right = Vec3.normalize(Vec3.cross(up, dir))
 //            val top = Vec3.cross(dir, right)
-            val top = Vec3.cross(right, dir)
+    fun getLookAtConditionScratchAPIxelMatrix(
+        position: Vec3,
+        lookAt: Vec3,
+        up: Vec3 = Vec3(0,1,0)
+    ): Mat4 {
+        val dir = Vec3.normalize(lookAt.sub(position))
+        val sid = Vec3.normalize(Vec3.cross(Vec3.normalize(up), dir))
+        val top = Vec3.normalize(Vec3.cross(dir, sid))
+        val lookAtMat = floatArrayOf(
+            sid.x, sid.y, sid.z, 0.0f,
+            top.x, top.y, top.z, 0.0f,
+            dir.x, dir.y, dir.z, 0.0f,
+            position.x, position.y, position.z, 1.0f
+        )
+        return Mat4(lookAtMat)
+    }
+        fun getLookAtOldMatrix(
+            eye: Vec3,
+            lookAt: Vec3,
+            up: Vec3 = Vec3(0,1,0)
+        ): Mat4 {
+            val dir = Vec3.normalize(lookAt.sub(eye))
+            val right = Vec3.normalize(Vec3.cross(dir, up))
+            val top = Vec3.normalize(Vec3.cross(right, dir))
             val lookAtMat = floatArrayOf(
                 right.x, right.y, right.z, 0.0f,
                 top.x, top.y, top.z, 0.0f,
@@ -233,6 +325,66 @@ class Mat4(_vals: FloatArray) {
             )
             return Mat4(lookAtMat)
         }
+        fun getLookAtSOMatrix(
+            eye: Vec3,
+            lookAt: Vec3,
+            up: Vec3 = Vec3(0,1,0)
+        ): Mat4 {
+            val dir = Vec3.normalize(eye.sub(lookAt))
+            var y = up.copy();
+            var x = Vec3.normalize(Vec3.cross(y,dir))
+
+            y = Vec3.cross(dir,x)
+//
+            val res = Mat4.identityMatrix
+            res[0] = x.x
+            res[1] = x.y
+            res[2] = x.z
+
+            res[4*1] = y.x
+            res[4*1 + 1] = y.y
+            res[4*1 + 2] = y.z
+
+            res[4*2] = dir.x
+            res[4*2 + 1] = dir.y
+            res[4*2 + 2] = dir.z
+
+            return (res * Mat4.getTranslationMatrix(eye))
+//            val yaw = (atan(dir.x / dir.z))
+//            val pitch = (acos(Vec2.length(Vec2(dir.x, dir.z))))
+//
+//            val yRot = Mat4.getRotationMatrix(Axis.Y, -yaw)
+//            val xRot = Mat4.getRotationMatrix(Axis.X, pitch)
+//
+//            val translation = Mat4.getTranslationMatrix(eye)
+
+
+//            val right = Vec3.normalize(Vec3.cross(up, dir))
+//            val top = Vec3.normalize(Vec3.cross(dir, right))
+//            val lookAtMat = floatArrayOf(
+//                right.x, right.y, right.z, 0.0f,
+//                top.x, top.y, top.z, 0.0f,
+//                -dir.x, -dir.y, -dir.z, 0.0f,
+//                Vec3.dot(right,eye.negative()), Vec3.dot(top,eye.negative()), Vec3.dot(dir.negative(),eye.negative()), 1.0f
+//            )
+        }
+        fun getLookAtCoolMatrix(
+            eye: Vec3,
+            lookAt: Vec3,
+            up: Vec3 = Vec3(0,1,0)
+        ): Mat4 {
+            val dir = Vec3.normalize(lookAt.sub(eye))
+            val right = Vec3.normalize(Vec3.cross(up, dir))
+            val top = Vec3.normalize(Vec3.cross(dir, right))
+            val lookAtMat = floatArrayOf(
+                right.x, right.y, right.z, 0.0f,
+                top.x, top.y, top.z, 0.0f,
+                -dir.x, -dir.y, -dir.z, 0.0f,
+                Vec3.dot(right,eye.negative()), Vec3.dot(top,eye.negative()), Vec3.dot(dir.negative(),eye.negative()), 1.0f
+            )
+            return Mat4(lookAtMat)
+        }
+
         fun getInverseLookAtMatrix(
             eye: Vec3,
             lookAt: Vec3,
@@ -240,15 +392,15 @@ class Mat4(_vals: FloatArray) {
         ): Mat4 {
             // TODO: check if this works.
 //            val dir = Vec3.normalize(lookAt - eye)
-            val dir = Vec3.normalize(eye - lookAt)
+            val dir = Vec3.normalize(lookAt - eye)
 //            val side = Vec3.normalize(Vec3.cross(dir, up))
-            val side = Vec3.normalize(Vec3.cross(up, dir))
+            val side = Vec3.normalize(Vec3.cross(dir, up))
 //            val top = Vec3.cross(side, dir)
-            val top = Vec3.cross(dir, side)
+            val top = Vec3.cross(side, dir)
             val projMatrix = floatArrayOf(
-                side.x(), top.x(), dir.x(), 0.0f,
-                side.y(), top.y(), dir.y(), 0.0f,
-                side.z(), top.z(), dir.z(), 0.0f,
+                side.x(), top.x(), -dir.x(), 0.0f,
+                side.y(), top.y(), -dir.y(), 0.0f,
+                side.z(), top.z(), -dir.z(), 0.0f,
                 -Vec3.dot(side, eye),
                 -Vec3.dot(top, eye),
                 -Vec3.dot(dir, eye),
@@ -261,40 +413,27 @@ class Mat4(_vals: FloatArray) {
         }
 
         fun getPerspectiveMatrix(fov: Float, _near: Float, _far: Float, _xRes: Float, _yRes: Float): Mat4 {
-            val aspectRatio = _xRes / _yRes
-            val p = (1.0 / tan(MathUtils.Pi * fov / 360.0)).toFloat()
-            val dz =  1.0f/(_near - _far)
+            val aspectRatio = 1.0f/(_xRes / _yRes)
+            val tanHalfFov = (1.0 / tan(MathUtils.Pi * fov / 360.0)).toFloat()
+            val dz =  1.0f/(_far - _near)
             val projMatrix = floatArrayOf(
-                p/aspectRatio, 0.0f, 0.0f, 0.0f,
-                0.0f, p, 0.0f, 0.0f,
-                0.0f, 0.0f, (_near + _far)*dz, -1.0f,
-                0.0f, 0.0f,  2.0f * _far * _near * dz, 0.0f
+                1.0f*(tanHalfFov*aspectRatio), 0.0f, 0.0f, 0.0f,
+                0.0f, tanHalfFov, 0.0f, 0.0f,
+                0.0f, 0.0f, -(_far + _near)*dz, -1.0f,
+                0.0f, 0.0f,  -2.0f * _far * _near * dz, 0.0f
             )
             return Mat4(projMatrix)
         }
-//        fun getPerspectiveMatrix(fov: Float, _near: Float, _far: Float, _xRes: Float, _yRes: Float): Mat4 {
-//            val aspectRatio = _xRes / _yRes
-//            val p = (1.0 / tan(MathUtils.Pi * fov / 360.0)).toFloat()
-//            val d = _far - _near
-//            val projMatrix = floatArrayOf(
-//                p, 0.0f, 0.0f, 0.0f,
-//                0.0f, p, 0.0f, 0.0f,
-//                0.0f, 0.0f, -(_far + _near) / d, -1.0f,
-//                0.0f, 0.0f, -2.0f * _far * _near / d, 0.0f
-//            )
-//            return Mat4(projMatrix)
-//        }
-        fun getPerspectiveMatrixOld(fov: Float, _near: Float, _far: Float, _xRes: Float, _yRes: Float): Mat4 {
-            val aspectRatio = _xRes / _yRes
-            val p = (1.0 / tan(MathUtils.Pi * fov / 360.0)).toFloat()
-            val d = _far - _near
+        fun getPerspectiveOldMatrix(fov: Float, _near: Float, _far: Float, _xRes: Float, _yRes: Float): Mat4 {
+            val aspectRatio = 1.0f/(_xRes / _yRes)
+            val tanHalfFov = (1.0 / tan(MathUtils.Pi * fov / 360.0)).toFloat()
+            val dz =  1.0f/(_far - _near)
             val projMatrix = floatArrayOf(
-                p, 0.0f, 0.0f, 0.0f,
-                0.0f, p, 0.0f, 0.0f,
-                0.0f, 0.0f, -(_far + _near) / d, -1.0f,
-                0.0f, 0.0f, -2.0f * _far * _near / d, 0.0f
+                aspectRatio*tanHalfFov, 0.0f, 0.0f, 0.0f,
+                0.0f, tanHalfFov, 0.0f, 0.0f,
+                0.0f, 0.0f, -(_near + _far)*dz, -1.0f,
+                0.0f, 0.0f,  -2.0f * _far * _near * dz, 0.0f
             )
-//            )
             return Mat4(projMatrix)
         }
     }

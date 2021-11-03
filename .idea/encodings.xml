@@ -2,18 +2,29 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/src/main" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/composite.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/composite.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cube.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cube.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cube.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cube.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cubeInstanced.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cubeModel.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cubeModel.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/line.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/line.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/particles.cp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/post.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/post.fp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/raymarch.fp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/FX/fxaa.fp" charset="UTF-16" />
-    <file url="file://$PROJECT_DIR$/src/res/shaders/composite.fp" charset="UTF-16" />
-    <file url="file://$PROJECT_DIR$/src/res/shaders/cube.fp" charset="UTF-16" />
-    <file url="file://$PROJECT_DIR$/src/res/shaders/cube.vp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/cubeGeom.fp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/cubeGeom.gp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/cubeGeom.vp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/include/global.include" charset="UTF-16" />
-    <file url="file://$PROJECT_DIR$/src/res/shaders/include/sdf.include" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/include/raymarch.include" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/include/utils.includе" charset="UTF-16" />
-    <file url="file://$PROJECT_DIR$/src/res/shaders/post.fp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/quad.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/quadRaymarch.vp" charset="UTF-16" />
   </component>
 </project>

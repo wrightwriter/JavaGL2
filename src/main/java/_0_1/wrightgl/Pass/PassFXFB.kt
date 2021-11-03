@@ -1,23 +1,16 @@
 package _0_1.wrightgl.Pass
 
-import _0_1.main.Glob
+import _0_1.main.Global
 import _0_1.math.vector.IVec2
-import _0_1.wrightgl.AbstractUniformsContainer
-import _0_1.wrightgl.buffer.StorageBuffer
 import _0_1.wrightgl.buffer.VB
 import _0_1.wrightgl.fb.FB
 import _0_1.wrightgl.fb.FBPingPong
-import _0_1.wrightgl.fb.Texture
 import _0_1.wrightgl.shader.ProgFX
 import _0_1.wrightgl.shader.ProgRender
 import org.lwjgl.opengl.GL11
 import java.util.function.Consumer
 
-class FXPassWithTex private constructor() : AbstractPass(), AbstractUniformsContainer {
-    override var uniformNumbers: HashMap<String, Any> = HashMap()
-    override var uniformTextures: HashMap<String, Texture> = HashMap()
-    override var uniformImages: HashMap<String, Texture> = HashMap()
-    override var boundSSBOs: HashMap<Int, StorageBuffer> = HashMap()
+class PassFXFB private constructor() : AbstractPass() {
 
     lateinit var fb: FB
         private set
@@ -25,8 +18,8 @@ class FXPassWithTex private constructor() : AbstractPass(), AbstractUniformsCont
 
     constructor(
         _fileNameFrag: String,
-        _folderPath: String = Glob.engine.fileSystem.sketchResourcesFolder,
-        _resolution: IVec2 = Glob.engine.res.copy(),
+        _folderPath: String = Global.engine.fileSystem.sketchResourcesFolder,
+        _resolution: IVec2 = Global.engine.res.copy(),
         _isPingPong: Boolean = false
     ) : this() {
         shaderProgram = ProgFX(
@@ -40,7 +33,7 @@ class FXPassWithTex private constructor() : AbstractPass(), AbstractUniformsCont
     }
     constructor(
         _shaderProgram: ProgRender,
-        _resolution: IVec2 = Glob.engine.res.copy(),
+        _resolution: IVec2 = Global.engine.res.copy(),
         _isPingPong: Boolean = false
     ) : this() {
         fb = if (_isPingPong)
@@ -58,7 +51,7 @@ class FXPassWithTex private constructor() : AbstractPass(), AbstractUniformsCont
     // TOUCHES GL_DEPTH_TEST STATE!!
     fun run(
         _inputFramebuffer: FB,
-        cb: Consumer<FXPassWithTex>? = null
+        cb: Consumer<PassFXFB>? = null
     ) {
         GL11.glDisable(GL11.GL_DEPTH_TEST)
         shaderProgram.use()

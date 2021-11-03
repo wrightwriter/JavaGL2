@@ -12,6 +12,9 @@ class IVec3: IVec {
     operator fun times(b: Int) = this.mul(b)
 
 
+    fun toFloatVec(): Vec3{
+        return Vec3(x,y,z)
+    }
 
     var x: Int
         get():Int = x()
@@ -51,6 +54,11 @@ class IVec3: IVec {
     }
     fun z(): Int {
         return vals[2]
+    }
+    constructor(x: Float, y: Float, z:Float) {
+        vals[0] = x.toInt()
+        vals[1] = y.toInt()
+        vals[2] = z.toInt()
     }
 
     constructor(x: Int, y: Int, z:Int) {

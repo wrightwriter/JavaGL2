@@ -20,6 +20,8 @@ class StorageBuffer private constructor(): AbstractBuffer() {
         }
 
         totalVertCnt = _data.size / singleVertElementsCnt
+
+        createBuffer()
     }
     constructor(
         _signature: IntArray,
@@ -37,6 +39,8 @@ class StorageBuffer private constructor(): AbstractBuffer() {
 
         // Array of zeroes
         data = Array<Float>(_vertCnt){i->_initialValue}.toFloatArray()
+
+        createBuffer()
     }
     private fun createBuffer(){
         pid = GL46.glCreateBuffers()

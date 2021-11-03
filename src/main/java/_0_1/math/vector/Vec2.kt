@@ -12,6 +12,9 @@ class Vec2: Vec {
     operator fun minus(b: Float) = this.sub(b)
     operator fun times(b: Float) = this.mul(b)
 
+    fun toIntVec(): IVec2{
+        return IVec2(x,y)
+    }
     // getters and setters
     var x: Float
         get():Float = x()
@@ -37,6 +40,10 @@ class Vec2: Vec {
 
 
 
+    constructor(x: Int, y: Int) {
+        vals[0] = x.toFloat()
+        vals[1] = y.toFloat()
+    }
     constructor(x: Float, y: Float) {
         vals[0] = x
         vals[1] = y
