@@ -62,6 +62,9 @@ class Vec3: Vec {
         return vals[2]
     }
 
+    fun lerp(other: Vec3, amt: Float): Vec3{
+        return this*amt + other*(1.0f - amt)
+    }
 //    fun rotateZ(){
 //        return this*
 //    }

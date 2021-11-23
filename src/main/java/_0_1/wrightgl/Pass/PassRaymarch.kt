@@ -8,7 +8,7 @@ import _0_1.wrightgl.shader.ProgRender
 import org.lwjgl.opengl.GL11
 import java.util.function.Consumer
 
-class PassRaymarch protected constructor(): AbstractPass() {
+class PassRaymarch protected constructor(): PassFX() {
 
     constructor(
         _fileNameFrag: String,
@@ -24,44 +24,24 @@ class PassRaymarch protected constructor(): AbstractPass() {
         shaderProgram = _shaderProgram
     }
 
-    // TODO
-    // TOUCHES GL_DEPTH_TEST STATE!!
-    fun run(
-        _outputFramebuffer: FB = Global.engine.wgl.currDrawFB,
-        _depthTest: Boolean = true,
-        cb: Consumer<PassRaymarch>? = null
-    ) {
-        if (_depthTest == false)
-            GL11.glDisable(GL11.GL_DEPTH_TEST)
-        else
-            GL11.glEnable(GL11.GL_DEPTH_TEST)
-
-        shaderProgram.use()
-        cb?.accept(this)
-        FB.bind(FB.Target.DRAW, _outputFramebuffer)
-        setCurrObjectUniforms()
-        VB.quadVB.render()
-    }
-
-    // TODO
-    // TOUCHES GL_DEPTH_TEST STATE!!
-    open fun run(
-        _inputFramebuffer: FB,
-        _outputFramebuffer: FB,
-        _depthTest: Boolean = true,
-        cb: Consumer<PassRaymarch>? = null
-    ) {
-        if (_depthTest == false)
-            GL11.glDisable(GL11.GL_DEPTH_TEST)
-        else
-            GL11.glEnable(GL11.GL_DEPTH_TEST)
-        shaderProgram.use()
-        cb?.accept(this)
-        _inputFramebuffer.setUniformTextures("s_Input")
-        FB.bind(FB.Target.DRAW, _outputFramebuffer)
-        setCurrObjectUniforms()
-        VB.quadVB.render(
-
-        )
-    }
+//    // TODO
+//    // TOUCHES GL_DEPTH_TEST STATE!!
+//    override fun run(
+//        _outputFramebuffer: FB,
+//        _depthTest: Boolean,
+//        cb: Consumer<PassFX>?
+//    ) {
+//        super.run(_outputFramebuffer, _depthTest, cb)
+//    }
+//
+//    // TODO
+//    // TOUCHES GL_DEPTH_TEST STATE!!
+//    override fun run(
+//        _inputFramebuffer: FB,
+//        _outputFramebuffer: FB,
+//        _depthTest: Boolean,
+//        cb: Consumer<PassFX>?
+//    ) {
+//        super.run(_inputFramebuffer, _outputFramebuffer, _depthTest, cb)
+//    }
 }

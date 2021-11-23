@@ -9,7 +9,7 @@ abstract class AbstractGUISetting protected constructor (){
         protected set
 
     init{
-        Global.engine!!.gui.settings.add(this)
+        Global.engine.gui.settings.add(this)
     }
     abstract fun get(): Any
 }

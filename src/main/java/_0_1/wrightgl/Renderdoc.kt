@@ -27,10 +27,12 @@ class Renderdoc : AutoCloseable {
     }
 
     init {
+        System.setProperty("jna.library.path", "D:\\Programming\\School\\JavaGL2\\src");
         val libspath = System.getProperty("jna.library.path")
         //        libspath = libspath + ";D:/Programming/School/JavaGL2/src";
 //        System.setProperty("jna.library.path",libspath);
 //        System.setProperty("jna.library.path","D:/Programming/School/JavaGL2/src");
+
         instance = Native.loadLibrary("renderdoc", RenderdocLibrary::class.java) as RenderdocLibrary
         val p = PointerByReference()
         instance.RENDERDOC_GetAPI(RenderdocVersion.eRENDERDOC_API_Version_1_4_1.value, p)

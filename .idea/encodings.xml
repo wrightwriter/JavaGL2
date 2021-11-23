@@ -2,11 +2,10 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/src/main" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java/lib" charset="windows-1252" />
     <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/composite.fp" charset="UTF-16" />
-    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/composite.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/computeTex.cp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cube.fp" charset="UTF-16" />
-    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cube.fp" charset="UTF-16" />
-    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cube.vp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cube.vp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cubeInstanced.vp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/cubeModel.fp" charset="UTF-16" />
@@ -15,9 +14,62 @@
     <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/line.vp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/particles.cp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/post.fp" charset="UTF-16" />
-    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/post.fp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/raymarch.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/_2021_10/raymarchCloud.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/composite.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/cube.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/cube.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/dof.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/line.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/line.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/line.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/lineStrip.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/points.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/points.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/post.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/tri.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/deferred/tri.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/cube.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/cube.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/line.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/line.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/line.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/lineStrip.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/normalsStrip.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/particles.cp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/points.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/points.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/post.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/tri.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlineart/tri.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/cube.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/cube.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/dof.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/line.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/line.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/line.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/lineStrip.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/points.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/points.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/post.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/outlines/ssao.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/subdivisionLines/dof.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/subdivisionLines/line.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/subdivisionLines/line.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/subdivisionLines/line.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/subdivisionLines/points.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/subdivisionLines/points.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/subdivisionLines/tri.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/main/java/sketches/subdivisionLines/tri.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/FX/boxblur.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/FX/chromab.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/FX/chromaticdispersion.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/FX/dofTeardown.fp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/FX/fxaa.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/FX/gaussian.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/FX/gaussianApprox.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/FX/ssao.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/FX/ssr.fp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/cubeGeom.fp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/cubeGeom.gp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/cubeGeom.vp" charset="UTF-16" />
@@ -26,5 +78,15 @@
     <file url="file://$PROJECT_DIR$/src/res/shaders/include/utils.includе" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/quad.vp" charset="UTF-16" />
     <file url="file://$PROJECT_DIR$/src/res/shaders/quadRaymarch.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/shit/dof.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/shit/dofBokehpass.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/shit/dofFilterpass.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/shit/dofGeom.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/shit/dofGeom.gp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/shit/dofGeom.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/shit/dofNoGeom.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/shit/dofNoGeom.vp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/shit/dofPrepass.fp" charset="UTF-16" />
+    <file url="file://$PROJECT_DIR$/src/res/shaders/shit/dofScatter.cp" charset="UTF-8" />
   </component>
 </project>

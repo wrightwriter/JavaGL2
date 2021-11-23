@@ -1,11 +1,21 @@
 package _0_1.wrightgl.buffer
 
+import _0_1.wrightgl.Model
+import io.github.jdiemke.triangulation.DelaunayTriangulator
+import io.github.jdiemke.triangulation.Vector2D
 import org.lwjgl.opengl.*
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL32.GL_TRIANGLES_ADJACENCY
 import org.lwjgl.opengl.GL32.GL_TRIANGLE_STRIP_ADJACENCY
 import org.lwjgl.opengl.GL40.GL_PATCHES
+import org.poly2tri.Poly2Tri
+import org.poly2tri.geometry.polygon.Polygon
+import org.poly2tri.geometry.polygon.PolygonPoint
+import org.tinfour.common.Vertex
+import org.tinfour.voronoi.BoundedVoronoiBuildOptions
+import org.tinfour.voronoi.BoundedVoronoiDiagram
 import java.nio.FloatBuffer
+import java.util.ArrayList
 
 open class VB protected constructor( ): AbstractBuffer() {
     var vaoPid: Int = 0
@@ -14,6 +24,7 @@ open class VB protected constructor( ): AbstractBuffer() {
     var primitiveType: PrimitiveType = PrimitiveType.TRIANGLES
     var mapped: Boolean = true
         protected set
+
 
 
 
@@ -46,6 +57,8 @@ open class VB protected constructor( ): AbstractBuffer() {
     companion object {
         lateinit var quadVB: VB
             internal set
+//        lateinit var singlePointVB: VB
+//            internal set
     }
 
     constructor(
@@ -134,13 +147,21 @@ open class VB protected constructor( ): AbstractBuffer() {
         mapped = true
     }
 
-    fun render(
+
+    open fun render(
         _primitiveType: PrimitiveType? = null,
         _culling: CullMode? = null,
         _instanceCnt: Int = 1,
     ) {
-        if (_culling != null)
-            GL46.glCullFace(_culling.value)
+
+        if (_culling == CullMode.DISABLED)
+            GL46.glDisable(GL_CULL_FACE)
+        else{
+            GL46.glEnable(GL_CULL_FACE)
+            if (_culling != null)
+                GL46.glCullFace(_culling.value)
+
+        }
 
         GL46.glBindVertexArray(vaoPid)
 

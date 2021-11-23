@@ -1,28 +1,10 @@
 package _0_1.wrightgl.buffer
 
 import _0_1.wrightgl.Model
+import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL46
 
-class VBIndexed private constructor(){
-    var type = AbstractBuffer.Type.FLOAT
-    var vaoPid: Int = 0
-    var name: String? = null
-
-//        lateinit var data: FloatArray
-//            protected set
-
-    var totalVertCnt: Int = 0
-        protected set
-    var singleVertElementsCnt: Int = 0
-        set
-
-    var singleVertSizeBytes: Int = 0
-        set
-    var totalSizeBytes: Int = 0
-        set
-
-    var signature: ArrayList<Int> = ArrayList()
-        private set
+class VBIndexed private constructor(): VB(){
 
     var vertexBufferPid = 0
         private set
@@ -33,8 +15,6 @@ class VBIndexed private constructor(){
     var coloursBufferPid = 0
         private set
     var indicesBufferPid = 0
-        private set
-    lateinit var primitiveType: VB.PrimitiveType
         private set
     constructor(
         _mesh: Model.Mesh,
@@ -51,29 +31,91 @@ class VBIndexed private constructor(){
 
         primitiveType = _primitiveType
 
-
-
+        val tempSignature = arrayListOf<Int>()
         if(_mesh.posList.size > 0){
-            signature.add(3)
+            tempSignature.add(3)
             vertexBufferPid = makeVertexBuffer(_mesh.posList, 3, 0, 0)
         }
         if( _mesh.normalsList.size > 0) {
-            signature.add(3)
+            tempSignature.add(3)
             normalBufferPid = makeVertexBuffer(_mesh.normalsList, 3, 1, 1)
         }
         if(_mesh.texCoordList.size > 0){
-            signature.add(2)
+            tempSignature.add(2)
             texCoordBufferPid = makeVertexBuffer(_mesh.texCoordList, 2, 2, 2)
         }
         if(_mesh.coloursList.size > 0){
-            signature.add(4)
+            tempSignature.add(4)
             coloursBufferPid = makeVertexBuffer(_mesh.coloursList, 2, 3, 3)
         }
+        signature = tempSignature.toIntArray()
 
         indicesBufferPid = GL46.glCreateBuffers()
         GL46.glNamedBufferStorage(indicesBufferPid, _mesh.indicesList.toIntArray(),GL46.GL_DYNAMIC_STORAGE_BIT)
         GL46.glVertexArrayElementBuffer(vaoPid, indicesBufferPid)
 
+
+    }
+
+    constructor(
+        _geometry: FloatArray,
+        _indices: IntArray,
+        _signature: IntArray,
+        _primitiveType: VB.PrimitiveType = VB.PrimitiveType.TRIANGLES,
+        _mapped: Boolean = false,
+        _flags: Int = GL46.GL_MAP_WRITE_BIT or GL46.GL_MAP_READ_BIT or GL46.GL_MAP_PERSISTENT_BIT or GL46.GL_MAP_COHERENT_BIT,
+    ) : this() {
+        vaoPid = GL46.glCreateVertexArrays()
+
+        signature = _signature
+
+        singleVertElementsCnt = 0
+        for (j in signature) {
+            singleVertElementsCnt += j
+        }
+//        totalVertCnt = _geometry.size / singleVertElementsCnt
+        totalVertCnt = _indices.size
+
+        singleVertSizeBytes  = singleVertElementsCnt * Float.SIZE_BYTES
+        totalSizeBytes = singleVertSizeBytes * totalVertCnt
+
+        primitiveType = _primitiveType
+
+        indicesBufferPid = GL46.glCreateBuffers()
+        GL46.glNamedBufferStorage(indicesBufferPid, _indices,GL46.GL_DYNAMIC_STORAGE_BIT)
+        GL46.glVertexArrayElementBuffer(vaoPid, indicesBufferPid)
+
+
+
+        primitiveType = _primitiveType
+
+        pid = GL46.glCreateBuffers()
+
+        GL46.glNamedBufferStorage(pid, _geometry, GL46.GL_DYNAMIC_STORAGE_BIT or _flags )
+
+        val bindIdx = 0
+
+        GL46.glVertexArrayVertexBuffer(vaoPid, bindIdx, pid, 0, singleVertSizeBytes)
+
+        var attribOffset: Int = 0
+        for (i in signature.indices) {
+            GL46.glEnableVertexArrayAttrib(vaoPid, i)
+            GL46.glVertexArrayAttribFormat(
+                vaoPid, i, signature[i], AbstractBuffer.Type.FLOAT.value,
+                false, attribOffset
+            )
+            GL46.glVertexArrayAttribBinding(vaoPid,i, bindIdx)
+            attribOffset += signature[i] * Float.SIZE_BYTES
+        }
+
+
+//        if (_mapped){
+//            flags = _flags
+//            mapGpuBuff(
+//                totalVertCnt,
+//                flags
+//            )
+//        }
 
     }
 
@@ -96,13 +138,19 @@ class VBIndexed private constructor(){
         return vboPid
     }
 
-    fun render(
-        _primitiveType: VB.PrimitiveType? = null,
-        _culling: VB.CullMode? = null,
-        _instanceCnt: Int = 1,
+    override fun render(
+        _primitiveType: VB.PrimitiveType?,
+        _culling: VB.CullMode?,
+        _instanceCnt: Int,
     ) {
-        if (_culling != null)
-            GL46.glCullFace(_culling.value)
+        if (_culling == CullMode.DISABLED)
+            GL46.glDisable(GL11.GL_CULL_FACE)
+        else{
+            GL46.glEnable(GL11.GL_CULL_FACE)
+            if (_culling != null)
+                GL46.glCullFace(_culling.value)
+
+        }
 
         GL46.glBindVertexArray(vaoPid)
 

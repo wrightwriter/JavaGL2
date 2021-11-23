@@ -2,6 +2,7 @@ package _0_1.math
 
 // Some functions gathered from 0b5vr on github
 
+import _0_1.math.vector.Vec2
 import _0_1.math.vector.Vec3
 import kotlin.math.tan
 
@@ -43,6 +44,9 @@ class Mat4(_vals: FloatArray) {
 
     fun inverse(): Mat4 {
         return Companion.inverse(this)!!
+    }
+    fun transpose(): Mat4 {
+        return Companion.transpose(this)
     }
 
     enum class Axis {
@@ -119,6 +123,7 @@ class Mat4(_vals: FloatArray) {
             val det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 
             val invDet = 1.0f / det;
+            // bruh
             if ( det == 0.0f ) { return null; }
             val ret = Mat4(
                 floatArrayOf(
@@ -384,6 +389,22 @@ class Mat4(_vals: FloatArray) {
             )
             return Mat4(lookAtMat)
         }
+        fun getLookAtMatrixNking(
+            eye: Vec3,
+            lookAt: Vec3,
+            up: Vec3 = Vec3(0, 1, 0)
+        ): Mat4 {
+            val dir = Vec3.normalize(eye.sub(lookAt))
+            val right = Vec3.cross(up, dir)
+            val top = Vec3.cross(dir, right)
+            val lookAtMat = floatArrayOf(
+                right.x, right.y, right.z, 0.0f,
+                top.x, top.y, top.z, 0.0f,
+                dir.x, dir.y, dir.z, 0.0f,
+                eye.x, eye.y, eye.z, 1.0f
+            )
+            return Mat4(lookAtMat)
+        }
 
         fun getInverseLookAtMatrix(
             eye: Vec3,
@@ -412,7 +433,28 @@ class Mat4(_vals: FloatArray) {
             return Mat4(projMatrix)
         }
 
-        fun getPerspectiveMatrix(fov: Float, _near: Float, _far: Float, _xRes: Float, _yRes: Float): Mat4 {
+        fun getOrthographicProjMatrix(_near: Float, _far: Float, _xRes: Float, _yRes: Float, _scale: Float = 50.0f): Mat4{
+            val dz =  (_far - _near)
+//            _xRes *= 0.4f;
+            var res = Vec2(_xRes, _yRes)
+
+            val l = -res.x;
+            val r = res.x;
+            val t = res.y;
+            val b = -res.y;
+            val aspectRatio = 1.0f/(res.x / res.y)
+
+            var result = Mat4(floatArrayOf(
+                2.0f/(r - l)*_scale, 0.0f, 0.0f, 0.0f,
+                0.0f, 2.0f/(t - b)*_scale, 0.0f, 0.0f,
+                0.0f, 0.0f,  2.0f/dz, 0.0f,
+                -(r + l)/(r - l), -(t + b)/(t - b),  -(_far + _near) / dz, 1.0f
+            ))
+
+            return result
+        }
+
+        fun getPerspectiveProjMatrix(fov: Float, _near: Float, _far: Float, _xRes: Float, _yRes: Float): Mat4 {
             val aspectRatio = 1.0f/(_xRes / _yRes)
             val tanHalfFov = (1.0 / tan(MathUtils.Pi * fov / 360.0)).toFloat()
             val dz =  1.0f/(_far - _near)

@@ -19,7 +19,8 @@ class Shader internal constructor(
     _fileName: String,
     _shaderType: Type? = null,
     _program: AbstractProgram,
-    _folderPath: String = Global.engine!!.fileSystem.sketchResourcesFolder
+    _folderPath: String = Global.engine!!.fileSystem.sketchResourcesFolder,
+    val _prependCodeString: String = ""
 ) {
     var programs: MutableList<AbstractProgram> = ArrayList()
     var pid = 0
@@ -91,7 +92,7 @@ class Shader internal constructor(
                     shaderCode = parseShadercode(shaderCode)
 
                 } catch (e: Exception){
-                    System.out.println("Shader file parsin error.")
+                    System.out.println("Shader file parsing error.")
                 }
 
 
@@ -112,6 +113,7 @@ class Shader internal constructor(
             successfulCompilation = false
         }
         if (!successfulCompilation) {
+            System.err.println(fileName + "\n" + errorLog + "\n" )
             GL20.glDeleteShader(pid)
             pid = 0
             var foundSelf = false
@@ -201,7 +203,7 @@ class Shader internal constructor(
 
 
 
-        shaderCode = "#version 460\n" + shaderCode
+        shaderCode = "#version 460\n" + _prependCodeString + shaderCode
         return shaderCode
     }
 

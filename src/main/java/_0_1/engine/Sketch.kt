@@ -2,7 +2,9 @@ package _0_1.engine
 
 import _0_1.math.vector.IVec2
 import _0_1.wrightgl.Camera
+import _0_1.wrightgl.Light
 import _0_1.wrightgl.WrightGL
+import _0_1.wrightgl.buffer.UBO
 import _0_1.wrightgl.fb.FB
 import _0_1.wrightgl.thing.Thing
 import imgui.ImGui
@@ -31,6 +33,20 @@ abstract class Sketch constructor(
     val frame
         get() = engine.frame
 
+    val lights : MutableList<Light> = ArrayList()
+
+    var lightsUBO = UBO(
+        "uboLights",
+        // Max 100 lights, each is 16 bits
+
+        // vec3 position
+        // vec3 colour
+        // mat4 P
+        // mat4 V
+        // float near, float far
+        16 + 100*16*(1 + 1 + 4 + 4 + 1)
+    ).bind(1)
+
 
     val io
         get() = engine.io
@@ -51,6 +67,7 @@ abstract class Sketch constructor(
 
 
     init{
+        lightsUBO.add(0.0f)
 
     }
     fun start() {
@@ -73,7 +90,10 @@ abstract class Sketch constructor(
 //                // logic here i guess?
 //                secsToCatchUp -= secsPerUpdate;
 //            }
+            lightsUBO.bind(1)
             display()
+
+            FB.bind(FB.Target.DRAW, FB.defaultFB)
             drawImGui()
 
             ImGuizmo.beginFrame();

@@ -48,6 +48,7 @@ class Texture {
 
     enum class InternalFormat(val value: Int) {
         RGBA32F(GL30.GL_RGBA32F),
+        RGBA16F(GL30.GL_RGBA16F),
         RGBA(GL11.GL_RGBA),
         RGB(GL11.GL_RGB),
         RG(GL30.GL_RG),
@@ -72,40 +73,85 @@ class Texture {
     enum class Type(val value: Int) {
         FLOAT(GL11.GL_FLOAT), UNSIGNED_BYTE(GL11.GL_UNSIGNED_BYTE);
     }
+    constructor(
+//        data: FloatBuffer? = null,
+        resx: Int = 500,
+        resy: Int = 500,
+        resz: Int = 500,
+        _internalFormat: InternalFormat? = InternalFormat.RGBA32F,
+        _format: Format? = Format.RGBA,
+        _type: Type? = Type.FLOAT
+    ) {
+        internalFormat = _internalFormat
+        format = _format
+        type = _type
+        // set res
+        res[0] = resx
+        res[1] = resy
+        res[2] = resz
+        if (format == Format.RGBA) {
+            channelCnt = 4
+        } else if (format == Format.RGB) {
+            channelCnt = 3
+        } else if (format == Format.RG) {
+            channelCnt = 2
+        } else if (format == Format.R) {
+            channelCnt = 1
+        }
+        pid = GL45.glCreateTextures(GL46.GL_TEXTURE_3D)
+
+        glTextureParameteri(pid, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR)
+        glTextureParameteri(pid, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR)
+        glTextureParameteri(pid, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT)
+        glTextureParameteri(pid, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT)
+//        glTextureStorage2D(pid,)
+
+        GL46.glTextureStorage3D(
+            pid,
+            1,
+            internalFormat!!.value,
+            resx,
+            resy,
+            resz,
+        )
+    }
 
     constructor(
         data: FloatBuffer? = null,
         resx: Int = Global.engine.res.x,
         resy: Int = Global.engine.res.y,
-        internalFormat: InternalFormat? = InternalFormat.RGBA32F,
-        format: Format? = Format.RGBA,
-        type: Type? = Type.FLOAT
+        _internalFormat: InternalFormat? = InternalFormat.RGBA32F,
+        _format: Format? = Format.RGBA,
+        _type: Type? = Type.FLOAT
     ) {
-        // set res
+        internalFormat = _internalFormat
+        format = _format
+        type = _type
         res[0] = resx
         res[1] = resy
         res[2] = 1
-        if (format == Format.RGBA){
+
+        if (_format == Format.RGBA){
             channelCnt = 4
-        } else if (format == Format.RGB){
+        } else if (_format == Format.RGB){
             channelCnt = 3
-        } else if (format == Format.RG){
+        } else if (_format == Format.RG){
             channelCnt = 2
-        } else if (format == Format.R){
+        } else if (_format == Format.R){
             channelCnt = 1
         }
         pid = GL45.glCreateTextures(GL11.GL_TEXTURE_2D)
 
-        glTextureParameteri(pid , GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR)
-        glTextureParameteri(pid , GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR)
-        glTextureParameteri(pid , GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT)
-        glTextureParameteri(pid , GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT)
+        glTextureParameteri(pid, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR)
+        glTextureParameteri(pid, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR)
+        glTextureParameteri(pid, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT)
+        glTextureParameteri(pid, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT)
 //        glTextureStorage2D(pid,)
 
         GL46.glTextureStorage2D(
             pid,
             1,
-            internalFormat!!.value,
+            _internalFormat!!.value,
             resx,
             resy
         )
@@ -261,26 +307,26 @@ class Texture {
     }
 
 
-    fun setUniformWritableImage(name: String, program: AbstractProgram = Global.engine!!.wgl.currProgram!!) {
-        val bindNumber = Global.engine!!.wgl.currImageBindNumber++
+    fun setUniformWritableImage(name: String, program: AbstractProgram = Global.engine.wgl.currProgram!!) {
+        val bindNumber = Global.engine.wgl.currImageBindNumber++
         setUniformWritableImage(bindNumber, name, program)
     }
 
-    fun setUniform(name: String, program: AbstractProgram = Global.engine!!.wgl.currProgram!!) {
+    fun setUniform(name: String, program: AbstractProgram = Global.engine.wgl.currProgram!!) {
         val bindNumber = Global.engine.wgl.currTexBindNumber++
         setUniform(bindNumber, name, program)
     }
 
-    fun setUniformWritableImage(_bindNumber: Int = -1, name: String, program: AbstractProgram? = Global.engine!!.wgl.currProgram) {
+    fun setUniformWritableImage(_bindNumber: Int = -1, name: String, program: AbstractProgram? = Global.engine.wgl.currProgram) {
         val loc = GL20.glGetUniformLocation(program!!.pid, name)
         GL42.glBindImageTexture(
             _bindNumber,
             pid,
             0,
-            false,
+            if (res.z > 1) true else false,
             0,
             GL15.GL_READ_WRITE,
-            format!!.value
+            internalFormat!!.value
         )
         GL20.glUniform1i(loc, _bindNumber)
     }

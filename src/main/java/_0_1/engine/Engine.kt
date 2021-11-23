@@ -27,7 +27,6 @@ import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
-import sketches._2021_10.Dayblabla
 import java.io.File
 import java.lang.Exception
 import java.nio.file.Path
@@ -88,6 +87,7 @@ class Engine private constructor(){
 
     lateinit var wgl: WrightGL
         private set
+
 
     var camera: Camera = CameraPilot()
 
@@ -153,6 +153,26 @@ class Engine private constructor(){
         val previousTime = time
         time = GLFW.glfwGetTime().toFloat()
         deltaTime = time - previousTime
+
+        // Set shared uniforms
+        wgl.uboShared.rewind()
+        wgl.uboShared.add( Global.engine.time)
+        wgl.uboShared.add( Global.engine.deltaTime)
+        wgl.uboShared.add( Global.engine.io.mousePos)
+        wgl.uboShared.add( io.deltaMousePos)
+        wgl.uboShared.add( if(io.RMBDown == true) 1.0f else 0.0f )
+        wgl.uboShared.add( if(io.LMBDown == true) 1.0f else 0.0f )
+        wgl.uboShared.add( Global.engine.res.toFloatVec())
+        wgl.uboShared.add( camera.eyePos)
+        wgl.uboShared.add( camera.viewMatrix)
+        wgl.uboShared.add( camera.inverseViewMatrix)
+        wgl.uboShared.add( camera.projectionMatrix)
+        wgl.uboShared.add( camera.projectionMatrix * camera.viewMatrix)
+        wgl.uboShared.add( camera.near)
+        wgl.uboShared.add( camera.far)
+
+        wgl.uboShared.bind(0)
+
     }
 
 
@@ -273,7 +293,8 @@ class Engine private constructor(){
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4)
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 6)
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE)
-        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GL11.GL_TRUE);
+        if(engineSettings.openGLDebugEnabled)
+            GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_DEBUG_CONTEXT, GL11.GL_TRUE);
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE)
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE)
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE)

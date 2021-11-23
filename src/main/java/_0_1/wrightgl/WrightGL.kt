@@ -1,11 +1,12 @@
 package _0_1.wrightgl
 
+import _0_1.engine.Constants
 import _0_1.engine.Engine
-import _0_1.main.Global
 import _0_1.math.Geometry
 import _0_1.math.Mat4
 import _0_1.math.vector.IVec
 import _0_1.math.vector.Vec
+import _0_1.wrightgl.buffer.UBO
 import org.lwjgl.nanovg.NVGColor
 import _0_1.wrightgl.buffer.VB
 import _0_1.wrightgl.fb.FB
@@ -33,11 +34,19 @@ class WrightGL(
         internal set
     var currSSBOBindNumber = 0
         internal set
+
+    var blendEnabled = true
+        internal set
+    var currBlendFunc = arrayOf(BlendMode.SRC_ALPHA, BlendMode.ONE_MINUS_SRC_ALPHA)
+        internal set
+
     var nvg: Long
         private set
     var nvgColor: NVGColor
         private set
 
+    lateinit var uboShared: UBO
+        private set
 
 
 
@@ -45,6 +54,7 @@ class WrightGL(
     init {
 
 
+        FB.defaultFB
 
         currDrawFB = FB.defaultFB
         currReadFB = FB.defaultFB
@@ -90,14 +100,26 @@ class WrightGL(
         // Settings
         GL11.glClearColor(1.0f, 0.0f, 0.0f, 0.0f)
 
+        glDepthMask(true);
         GL11.glEnable(GL11.GL_CULL_FACE)
         GL11.glEnable(GL11.GL_DEPTH_TEST)
         GL11.glEnable(GL11.GL_TEXTURE_2D)
         GL11.glEnable(GL11.GL_STENCIL_TEST)
+
+        if (blendEnabled)
+            glEnable(GL_BLEND)
+        else
+            glDisable(GL_BLEND)
+
+        glBlendFunc(currBlendFunc[0].value, currBlendFunc[1].value)
 //            GL11.glEnable(GL_TESS_CONTROL_SHADER)
+
+        glPrimitiveRestartIndex(Constants.primitiveRestartIndex)
+        glEnable(GL_PRIMITIVE_RESTART)
 
         glEnable(GL_PROGRAM_POINT_SIZE);
 
+        uboShared = UBO("uboShared")
 
 
 //        gl.glVertexArrayAttribBinding(vertexArrayName.get(0), Semantic.Attr.POSITION, Semantic.Stream.A);
@@ -128,34 +150,26 @@ class WrightGL(
 //                GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
     }
 
-
-    fun updateMatrices() {
-        // Update view matrix
-
-        // Update projection matrix
+    enum class BlendMode(val value: Int){
+        SRC_ALPHA(GL_SRC_ALPHA),
+        DST_ALPHA(GL_DST_ALPHA),
+        SRC_COLOR(GL_SRC_COLOR),
+        DST_COLOR(GL_DST_COLOR),
+        ONE_MINUS_SRC_ALPHA(GL_ONE_MINUS_SRC_ALPHA),
+        ONE(GL_ONE),
+        ZERO(GL_ZERO),
     }
 
-    fun setSharedUniforms() {
-        // Set uniforms
-//        val Time = (System.currentTimeMillis() - Glob.engine.timeStart).toFloat() / 1000f
-        engine.wgl.setUniform("Time", Global.engine.time)
-        engine.wgl.setUniform("u_deltaTime", Global.engine.time)
-
-        engine.wgl.setUniform("u_mousePos", engine.io.mousePos)
-        engine.wgl.setUniform("u_deltaMousePos", engine.io.deltaMousePos)
-        engine.wgl.setUniform("u_RMBDown", if(engine.io.RMBDown == true) 1.0f else 0.0f )
-        engine.wgl.setUniform("u_LMBDown", if(engine.io.LMBDown == true) 1.0f else 0.0f )
-//        engine.wgl.setUniform("u_RMBDown", if(engine.io.LMBDown == true) 1.0f else 0.0f )
-//        engine.wgl.setUniform("u_RMBDown", if(engine.io.LMBDown == true) 1.0f else 0.0f )
-
-        engine.wgl.setUniform("R", engine.res.toFloatVec())
-        engine.wgl.setUniform("V", engine.camera.viewMatrix)
-        engine.wgl.setUniform("invV", engine.camera.inverseViewMatrix)
-        engine.wgl.setUniform("P", engine.camera.projectionMatrix)
+    fun enableBlend(src: BlendMode = BlendMode.SRC_ALPHA, dst: BlendMode = BlendMode.ONE_MINUS_SRC_ALPHA){
+        blendEnabled = true;
+        glEnable(GL_BLEND)
+        currBlendFunc[0] = src;
+        currBlendFunc[1] = dst;
+        glBlendFunc(src.value, dst.value)
     }
-
-    enum class UniformType {
-        Float, Int, Matrix
+    fun disableBlend(){
+        blendEnabled = false;
+        glDisable(GL_BLEND)
     }
 
     fun useProgram(_program: AbstractProgram) {
@@ -190,6 +204,10 @@ class WrightGL(
         }
     }
 
+    fun setUniform(_name: String?, _value: Boolean) {
+        val loc = GL20.glGetUniformLocation(currProgram!!.pid, _name)
+        GL20.glUniform1i(loc, if (_value == true) 1 else 0)
+    }
     fun setUniform(_name: String?, _value: Vec) {
         setUniform(_name, _value.vals)
     }

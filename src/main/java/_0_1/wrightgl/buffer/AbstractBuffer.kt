@@ -1,6 +1,8 @@
 package _0_1.wrightgl.buffer
 
+import _0_1.engine.Constants
 import _0_1.main.Global
+import _0_1.math.vector.IVec3
 import _0_1.math.vector.Vec3
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER
@@ -33,8 +35,8 @@ abstract class AbstractBuffer {
     fun bindAsSSBO(bindIdx: Int = 0){
         GL46.glBindBufferBase(GL_SHADER_STORAGE_BUFFER, bindIdx, pid)
         Global.engine.wgl.setUniform(
-            "u_ssboRes[" + bindIdx.toString() + "]",
-            Vec3(totalVertCnt,1,1).vals
+            Constants.ssboRes + "[" + bindIdx.toString() + "]",
+            totalVertCnt
         )
 
     }

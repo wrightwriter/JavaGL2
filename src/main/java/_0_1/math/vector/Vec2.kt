@@ -64,6 +64,10 @@ class Vec2: Vec {
         this.vals[1] = vals[1]
     }
 
+    fun lerp(other: Vec2, amt: Float): Vec2{
+        return this*amt + other*(1.0f - amt)
+    }
+
     fun copy(): Vec2 {
         return Vec2(this)
     }

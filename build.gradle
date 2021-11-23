@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.6.0-RC'
+//    kotlin("jvm") version "1.6.0-RC"
 }
 
 project.ext.lwjglVersion = "3.2.3"
@@ -12,10 +13,22 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
+    maven {
+        url "http://maven.imagej.net/content/repositories/public/"
+        allowInsecureProtocol = true
+    }
+
+    maven { url "https://jitpack.io" }
+
 }
 
 dependencies {
+    compileOnly "org.jetbrains.kotlin:kotlin-reflect:1.6.0-RC"
+
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
 
 //    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
 //    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
@@ -31,6 +44,8 @@ dependencies {
     implementation "org.lwjgl:lwjgl-opengl"
     implementation "org.lwjgl:lwjgl-shaderc"
     implementation "org.lwjgl:lwjgl-stb"
+    implementation 'org.orbisgis:poly2tri-core:0.1.2'
+    implementation 'org.tinfour:TinfourCore:2.1.7'
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
@@ -44,7 +59,11 @@ dependencies {
     implementation "org.joml:joml:${jomlVersion}"
 
 
-    implementation "uk.co.caprica:vlcj:5.0.0"
+    implementation "uk.co.caprica:vlcj:5.0.0-SNAPSHOT"
+    implementation "org.orbisgis:poly2tri:0.1.2"
+    implementation "com.github.jdiemke.delaunay-triangulator:DelaunayTriangulator:1.0.0"
+
+//    implementation 'uk.co.caprica:vlcj:4.7.1'
 
     implementation "io.github.spair:imgui-java-app:1.84.1.3"
     implementation "io.github.spair:imgui-java-binding:$imguiVersion"
@@ -52,9 +71,13 @@ dependencies {
     implementation "io.github.spair:imgui-java-natives-windows:$imguiVersion"
 
 
+//    implementation 'com.github.dmac100:clipper:Version'
+
+
 
 //    implementation "com.github.jdiemke.delaunay-triangulator"
-    implementation 'com.sun.jna:jna:3.0.9'
+//    implementation 'com.sun.jna:jna:3.0.9'
+//    implementation 'net.java.dev.jna:jna:3.0.9'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 compileKotlin {

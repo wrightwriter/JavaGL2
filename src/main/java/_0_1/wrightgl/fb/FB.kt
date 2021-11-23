@@ -1,5 +1,6 @@
 package _0_1.wrightgl.fb
 
+import _0_1.engine.Constants
 import _0_1.main.Global
 import _0_1.math.vector.IVec2
 import _0_1.math.vector.Vec4
@@ -52,6 +53,15 @@ open class FB {
             }
         }
     }
+    fun bindDraw() {
+        this.bind(FB.Target.DRAW)
+    }
+    fun bindRead() {
+        this.bind(FB.Target.READ)
+    }
+    fun bind(target: Target = FB.Target.FRAMEBUFFER) {
+        FB.bind(target,this)
+    }
 
     companion object {
         val defaultFB = FB(0)
@@ -60,32 +70,35 @@ open class FB {
 
         fun bind(target: Target, fb: FB) {
             when (target) {
-                Target.READ -> Global.engine!!.wgl.currReadFB = fb
-                Target.DRAW -> Global.engine!!.wgl.currDrawFB = fb
+                Target.READ -> Global.engine.wgl.currReadFB = fb
+                Target.DRAW -> Global.engine.wgl.currDrawFB = fb
                 Target.FRAMEBUFFER -> {
-                    Global.engine!!.wgl.currReadFB = fb
-                    Global.engine!!.wgl.currDrawFB = Global.engine!!.wgl.currReadFB
+                    Global.engine.wgl.currReadFB = fb
+                    Global.engine.wgl.currDrawFB = Global.engine.wgl.currReadFB
                 }
             }
             GL30.glBindFramebuffer(target.value, fb.pid)
 //            GL46.glFramebuff
             if (target == Target.DRAW || target == Target.FRAMEBUFFER) {
+                if (fb !== defaultFB){
+                    if (fb.textures.size > 0)
+                        glViewport(0,0, fb.textures[0].res.x, fb.textures[0].res.y)
+                    else
+                        glViewport(0,0, fb.depthTexture!!.res.x, fb.depthTexture!!.res.y)
+                } else
+                    glViewport(0,0, Global.engine.res.x, Global.engine.res.y) // CURSED
+
                 if (fb !== defaultFB) {
                     val texAttachmentsCnt = fb.textures.size
                     val attachments = IntArray(texAttachmentsCnt)
                     for (i in 0 until texAttachmentsCnt) {
                         attachments[i] = GL30.GL_COLOR_ATTACHMENT0 + i
                     }
-//                    GL46.glNamedFramebufferDrawBuffer(fb.pid, 1, attachments)
                     GL46.glNamedFramebufferDrawBuffers(fb.pid, attachments)
-                    GL20.glDrawBuffers(attachments)
                 } else {
                     val attachments = intArrayOf(GL11.GL_BACK)
-//                    GL20.glDrawBuffers(attachments)
-                    GL20.glDrawBuffers(attachments)
-                    GL46.glNamedFramebufferDrawBuffer(fb.pid, GL11.GL_BACK)
+                    GL46.glNamedFramebufferDrawBuffers(fb.pid, attachments)
                 }
-
             }
         }
 
@@ -142,8 +155,12 @@ open class FB {
         pid = _pid
     }
 
-    // Constructor for FB
 
+    // Cursed.
+    // Does nothing.
+    protected constructor( ) {
+
+    }
 
     constructor(
         _width: Int = Global.engine.res.x,
@@ -156,7 +173,9 @@ open class FB {
         // TODO: implement
         renderbuffer: Boolean = false,
         pingPong: Boolean = false,
+        _name: String? = null,
     ) {
+        name = _name
 //        val globalDrawFB = Glob.engine.wgl.currDrawFB
 //        val globalReadFB = Glob.engine.wgl.currReadFB
         pid = GL45.glCreateFramebuffers()
@@ -224,6 +243,9 @@ open class FB {
     }
 
 
+    fun clearDepth(){
+        clear( bitmask = arrayOf(FbBitmask.DEPTH) )
+    }
     // TODO
     fun clearAllAttachments(
         colour: Vec4 = Vec4(0.0f, 0.0f, 0.0f, 1.0f),
@@ -233,7 +255,7 @@ open class FB {
 //            FbBitmask.STENCIL,
         ),
     ){
-        var allAttachmentIndices: IntArray = IntArray(textures.size){i->i}
+        val allAttachmentIndices: IntArray = IntArray(textures.size){i->i}
         clear(
             colour,
             bitmask,
@@ -319,11 +341,13 @@ open class FB {
 //        }
 //    }
 
-    fun setUniformTextures(uniformName: String) {
+    fun setFBTexturesAsUniforms(uniformName: String = Constants.InputFBUniformName) {
         for (i in textures.indices) {
             val tex = textures[i]
-            tex.setUniform( uniformName + "_" + ('A'.code + i).toChar())
+            tex.setUniform( uniformName + "[" + ('0'.code + i).toChar() + "]")
         }
+        if (depthTexture != null)
+            depthTexture!!.setUniform( uniformName + "Depth")
     }
 
 }

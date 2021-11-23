@@ -1,16 +1,15 @@
 package _0_1.engine
 
-import _0_1.engine.gui.AbstractGUISetting
-import _0_1.engine.gui.GUISliderFloat
-import _0_1.engine.gui.GUISliderVec3
-import _0_1.engine.gui.GUISliderVec4
+import _0_1.engine.gui.*
 import _0_1.main.Global
 import _0_1.math.vector.IVec2
+import _0_1.wrightgl.AbstractUniformsContainer
 import _0_1.wrightgl.fb.FB
 import _0_1.wrightgl.fb.Texture
 import _0_1.wrightgl.shader.AbstractProgram
 import _0_1.wrightgl.shader.Shader
 import imgui.ImGui
+import imgui.ImVec2
 import imgui.extension.imguizmo.ImGuizmo
 import imgui.extension.implot.ImPlot
 import imgui.flag.ImGuiCol
@@ -19,31 +18,80 @@ import imgui.flag.ImGuiConfigFlags
 import imgui.flag.ImGuiWindowFlags
 import imgui.type.ImBoolean
 import org.lwjgl.glfw.GLFW.*
-import org.lwjgl.system.windows.User32.HWND_NOTOPMOST
-import org.lwjgl.system.windows.User32.HWND_TOPMOST
-import org.lwjgl.system.windows.User32.SWP_NOMOVE
-import org.lwjgl.system.windows.User32.SWP_NOSIZE
+import org.lwjgl.opengl.GL30
 
 
 class GUI {
     var settings: ArrayList<AbstractGUISetting> = ArrayList()
+    var exposedUniforms: HashMap<AbstractUniformsContainer, ArrayList<AbstractUniformsContainer.AbstractUniform>> =
+        HashMap<AbstractUniformsContainer, ArrayList<AbstractUniformsContainer.AbstractUniform>>()
 
 
     companion object{
         var windowOnTop = ImBoolean(false)
     }
+    private fun showExposedUniforms(){
+        // kill me
 
-    fun showSettingsInImGui(){
+        var imID = 0
+        for((container, uniformList) in exposedUniforms){
+            if (container.name != ""){
+                ImGui.text( container.name )
+            }
+            for (abstractUniform in uniformList){
+
+                ImGui.pushID(1000 + imID++)
+                if (abstractUniform.javaClass.simpleName == "UniformFloat"){
+                    val uniform = abstractUniform as AbstractUniformsContainer.UniformFloat
+                    if (
+                        ImGui.dragFloat(
+                            uniform.name,
+                            uniform.valueArray,
+                        )
+                    ) {
+                        uniform.set(uniform.valueArray[0])
+                    }
+                } else if (abstractUniform.javaClass.simpleName == "UniformBoolean"){
+                    val uniform = abstractUniform as AbstractUniformsContainer.UniformBoolean
+                    if(
+                        ImGui.checkbox(
+                            uniform.name,
+                            uniform.value
+                        )
+                    ) {
+                        uniform.set(!uniform.value)
+                    }
+                } else if (abstractUniform.javaClass.simpleName == "UniformInt"){
+                    val uniform = abstractUniform as AbstractUniformsContainer.UniformInt
+                    if (
+                        ImGui.dragInt(
+                            uniform.name,
+                            uniform.valueArray,
+                        )
+                    ) {
+                        uniform.set(uniform.valueArray[0])
+                    }
+                }
+            ImGui.popID()
+        }
+    }
+}
+
+fun showSettingsInImGui(){
         // ---------------- SHOW GUI ---------------- //
         ImGui.begin("Settings")
         for(guiSetting in settings){
             if (guiSetting is GUISliderFloat){
-                //                    ImGui.sliderFloat("zPos", guiSetting.value as ImFloat, -7.0f, 17.0f);
                 ImGui.sliderFloat(
                     guiSetting.name,
                     guiSetting.value as FloatArray,
                     guiSetting.min,
                     guiSetting.max
+                )
+            } else if (guiSetting is GUISliderFloatInfinite){
+                ImGui.dragFloat(
+                    guiSetting.name,
+                    guiSetting.value as FloatArray,
                 )
             } else if (guiSetting is GUISliderVec3){
                 ImGui.sliderFloat3(
@@ -52,6 +100,11 @@ class GUI {
                     guiSetting.min,
                     guiSetting.max
                 )
+            } else if (guiSetting is GUISliderVec3Infinite){
+                ImGui.dragFloat3(
+                    guiSetting.name,
+                    guiSetting.value as FloatArray,
+                )
             } else if (guiSetting is GUISliderVec4){
                 ImGui.sliderFloat4(
                     guiSetting.name,
@@ -59,13 +112,20 @@ class GUI {
                     guiSetting.min,
                     guiSetting.max
                 )
-            } else if (guiSetting is GUISliderVec4){
+            } else if (guiSetting is GUISliderVec4Infinite){
+                ImGui.dragFloat4(
+                    guiSetting.name,
+                    guiSetting.value as FloatArray,
+                )
+            } else if (guiSetting is GUICheckbox){
                 ImGui.checkbox(
                     guiSetting.name,
                     (guiSetting.value as ImBoolean)
                 )
             }
         }
+
+        showExposedUniforms()
 
 
         if (ImGui.checkbox( "On Top", windowOnTop ))
@@ -78,12 +138,35 @@ class GUI {
         // ---------------- SHOW TEXTURES ---------------- //
         ImGui.begin("FB Textures")
         val imWinSz = IVec2(ImGui.getWindowSize().x, ImGui.getWindowSize().y)
+        var unnamedFBIdx = 0
         for(fb in FB.frameBuffersList) {
 
             if (fb.name != null)
                 ImGui.text(fb.name)
+            else {
+                ImGui.text("Unnamed FB " + unnamedFBIdx++.toString())
+            }
 
-            for(tex in fb.textures) {
+            if(fb.textures.size > 0){
+                for(tex in fb.textures) {
+                    if (tex.res.z == 1){
+                        //                        val
+                        val texRes = tex.res.xy
+                        //                        val texRatio = tex.res.x/tex.res.y
+                        var newTexRes = texRes
+                        val maxSz = imWinSz.x
+                        if (texRes.x > maxSz){
+                            val ratioImWinxTexSzX = texRes.x/maxSz
+                            newTexRes /= ratioImWinxTexSzX
+                            newTexRes /= 2
+                        }
+                        //                        val bigger
+                        ImGui.image(tex.pid,newTexRes.x.toFloat(),newTexRes.y.toFloat(), 0.0f, 1.0f, 1.0f, 0.0f)
+
+                    }
+                }
+            } else {
+                val tex = fb.depthTexture!!
                 if (tex.res.z == 1){
                     //                        val
                     val texRes = tex.res.xy
@@ -95,9 +178,7 @@ class GUI {
                         newTexRes /= ratioImWinxTexSzX
                         newTexRes /= 2
                     }
-                    //                        val bigger
-                    ImGui.image(tex.pid,newTexRes.x.toFloat(),newTexRes.y.toFloat())
-
+                    ImGui.image(tex.pid,newTexRes.x.toFloat(),newTexRes.y.toFloat(), 0.0f, 1.0f, 1.0f, 0.0f)
                 }
             }
         }

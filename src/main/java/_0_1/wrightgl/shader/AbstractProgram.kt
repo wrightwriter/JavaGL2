@@ -18,13 +18,12 @@ abstract class AbstractProgram protected constructor(){
     }
 
     fun use() {
-        val wgl: WrightGL = Global.engine!!.wgl
+        val wgl: WrightGL = Global.engine.wgl
         wgl.currProgram = this
         wgl.currTexBindNumber = 0
         wgl.currImageBindNumber = 0
         wgl.currSSBOBindNumber = 0
         GL20.glUseProgram(pid)
-        wgl.setSharedUniforms()
         // Set uniform textures
         for(t: Texture in uniformTextures.keys){
             val texUniformName = uniformTextures[t]

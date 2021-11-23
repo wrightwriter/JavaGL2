@@ -8,16 +8,14 @@ import _0_1.math.vector.Vec2
 import _0_1.math.vector.Vec3
 import org.joml.Matrix4f
 import org.lwjgl.glfw.GLFW.*
-import kotlin.math.cos
-import kotlin.math.sin
 
 
 abstract class Camera {
     var roll = 0.0f
     var fov = 80.0f
-    var near = 0.01f
+    var near = 0.05f
     var far = 100.001f
-    var eyePos: Vec3 = Vec3(0,0,-5)
+    var eyePos: Vec3 = Vec3(0,0,5)
 
     var viewMatrix: Mat4 = Mat4.identityMatrix
     var projectionMatrix: Mat4 = Mat4.identityMatrix
@@ -25,13 +23,28 @@ abstract class Camera {
 
     abstract fun update()
     protected fun updateProjMatrix(){
-        projectionMatrix = Mat4.getPerspectiveMatrix(
+        projectionMatrix = Mat4.getPerspectiveProjMatrix(
             fov,
             near,
             far,
             Global.engine.res.x.toFloat(),
             Global.engine.res.y.toFloat()
         )
+//        val scale = 0.01f;
+//        org.joml.Matrix4f().identity().ortho(
+//            -Global.engine.res.x.toFloat()*scale,
+//            Global.engine.res.x.toFloat()*scale,
+//            -Global.engine.res.y.toFloat()*scale,
+//            Global.engine.res.y.toFloat()*scale,
+//            near,
+//            far,
+//        ).get(projectionMatrix.vals)
+//            projectionMatrix = Mat4.getOrthographicProjMatrix(
+//            near,
+//            far,
+//            Global.engine.res.x.toFloat(),
+//            Global.engine.res.y.toFloat()
+//        )
     }
 }
 class CameraLookAt: Camera(){
@@ -39,23 +52,13 @@ class CameraLookAt: Camera(){
     var up: Vec3 = Vec3(0,1,0)
 
     override fun update(){
-//        viewMatrix =  Mat4.getLookAtSOMatrix(eyePos, lookAt)* Mat4.identityMatrix
-//        viewMatrix =  Mat4.getLookAtOldMatrix(eyePos, lookAt, Vec3(0,1,0))
-//          viewMatrix =
         var mat = Matrix4f().identity()
 
-          org.joml.Matrix4f().identity().lookAt(
+          org.joml.Matrix4f().lookAt(
               -eyePos.x, eyePos.y, eyePos.z,
              -lookAt.x, lookAt.y, lookAt.z,
               0.0f,1.0f,0.0f).get(viewMatrix.vals)
 
-
-//        ) * Mat4.getTranslationMatrix(eyePos.negative()) * Mat4.identityMatrix
-//        inverseViewMatrix = Mat4.getInverseLookAtMatrix(
-//            eyePos,
-//            lookAt,
-//            up
-//        )
         inverseViewMatrix = projectionMatrix
             .times(viewMatrix)
             .inverse()
@@ -94,7 +97,7 @@ class CameraPilot: Camera(){
 
         if (io.keyboard[IO.Key.LCtrl]!!.Down){
             var keyInputRoll = 0.0f;
-            var speed = 10.05f;
+            var speed = 4.65f;
             speed *= Global.engine.deltaTime;
 
 
@@ -141,23 +144,13 @@ class CameraPilot: Camera(){
 
         }
 
-//        viewMatrix = Mat4.getLookAtSOMatrix(
-//            eyePos,
-//            eyePos + dir,
-//            Vec3(0,1,0)
-//        )
-
         var mat = Matrix4f().identity()
 
-        org.joml.Matrix4f().identity().lookAt(
+        org.joml.Matrix4f().lookAt(
             -eyePos.x, eyePos.y, eyePos.z,
             -eyePos.x - dir.x, eyePos.y + dir.y, eyePos.z + dir.z,
             0.0f,1.0f,0.0f).get(viewMatrix.vals)
-//        viewMatrix = Mat4.getLookAtSOMatrix(
-//            eyePos,
-//            eyePos + dir,
-//            Vec3(0,1,0)
-//        )
+
 
         updateProjMatrix()
 

@@ -8,14 +8,17 @@ import org.lwjgl.BufferUtils
 import org.lwjgl.PointerBuffer
 import org.lwjgl.assimp.*
 import org.lwjgl.assimp.Assimp.*
+import java.lang.Math.pow
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.util.*
+import kotlin.jvm.internal.Intrinsics
 
 
 class Model(
     val fileName: String,
-    val folderPath: String = Global.engine.fileSystem.sketchResourcesFolder
+    val folderPath: String = Global.engine.fileSystem.sketchResourcesFolder,
+    val hasOutlines: Boolean = true,
 ) {
 
 
@@ -38,6 +41,8 @@ class Model(
     val materials: MutableList<Material> = ArrayList<Material>()
     var meshes: ArrayList<Mesh> = ArrayList<Mesh>()
         protected set
+    var meshesOutlines: ArrayList<Mesh> = ArrayList<Mesh>()
+        protected set
 
     init{
         loadFile(fileName,folderPath)
@@ -52,79 +57,6 @@ class Model(
                 (_folderPath + _filePath),
                 Assimp.aiProcess_Triangulate
             )!!
-//            var upAxis = 1
-//            var upAxisSign = 1
-//            var frontAxis = 2
-//            var frontAxisSign = 1
-//            var coordAxis = 0
-//            var coordAxisSign = 1
-//
-//            var unitScaleFactor = 1.0
-//
-//            val metaData =scene.mMetaData()!!
-//            for (metaDataIndex in 0 until metaData.mNumProperties()){
-//                val key = metaData.mKeys().get( metaDataIndex).dataString()
-//                val value = metaData.mValues().get(metaDataIndex)
-//
-//                if( key == "UnitScaleFactor" ){
-//                    val data = value.mData(1).get(0).toDouble()
-//                    unitScaleFactor = data
-//                } else {
-//                    val data = value.mData(1).get(0).toInt()
-//                    if( key == "UpAxis" ){
-//                        upAxis = data
-//                    } else if( key == "UpAxisSign" ){
-//                        upAxisSign = data
-//                    } else if( key == "FrontAxis" ){
-//                        frontAxis = data
-//                    } else if( key == "FrontAxisSign" ){
-//                        frontAxisSign = data
-//                    } else if( key == "CoordAxis" ){
-//                        coordAxis = data
-//                    } else if( key == "CoordAxisSign" ){
-//                        coordAxisSign = data
-//                    }
-//                }
-//            }
-//            var upVec: AIVector3D = AIVector3D.calloc()
-//            var forwardVec: AIVector3D = AIVector3D.calloc()
-//            var rightVec: AIVector3D = AIVector3D.calloc()
-//
-//            if(upAxis == 0){
-//                upVec.set(1.0f*upAxisSign*unitScaleFactor.toFloat(),0.0f,0.0f)
-//            } else if(upAxis == 1){
-//                upVec.set(0.0f,1.0f*upAxisSign*unitScaleFactor.toFloat(),0.0f)
-//            } else if(upAxis == 2){
-//                upVec.set(0.0f,0.0f,1.0f*upAxisSign*unitScaleFactor.toFloat())
-//            }
-//
-//            if(frontAxis == 0){
-//                forwardVec.set(1.0f*frontAxisSign*unitScaleFactor.toFloat(),0.0f,0.0f)
-//            } else if(frontAxis == 1){
-//                forwardVec.set(0.0f,1.0f*frontAxisSign*unitScaleFactor.toFloat(),0.0f)
-//            } else if(frontAxis == 2){
-//                forwardVec.set(0.0f,0.0f,1.0f*frontAxisSign*unitScaleFactor.toFloat())
-//            }
-//
-//            if(coordAxis == 0){
-//                rightVec.set(1.0f*coordAxisSign*unitScaleFactor.toFloat(),0.0f,0.0f)
-//            } else if(coordAxis == 1){
-//                rightVec.set(0.0f,1.0f*coordAxisSign*unitScaleFactor.toFloat(),0.0f)
-//            } else if(coordAxis == 2){
-//                rightVec.set(0.0f,0.0f,1.0f*coordAxisSign*unitScaleFactor.toFloat())
-//            }
-//
-//
-//
-//            var mat: AIMatrix4x4 = AIMatrix4x4.calloc()
-//            mat.set(
-//                rightVec.x(), rightVec.y(), rightVec.z(), 0.0f,
-//                upVec.x(), upVec.y(), upVec.z(), 0.0f,
-//                forwardVec.x(), forwardVec.y(), forwardVec.z(), 0.0f,
-//                0.0f, 0.0f, 0.0f, 1.0f,
-//            )
-//
-//            scene.mRootNode()!!.mTransformation(mat)
 
 
             if (
@@ -134,20 +66,36 @@ class Model(
                 // TODO: Error handling
                 println("Couldn't load model")
             }
-            val numMaterials: Int = scene.mNumMaterials()
-            val aiMaterials: PointerBuffer = scene.mMaterials()!!
-            for (i in 0 until numMaterials) {
-                val aiMaterial = AIMaterial.create(aiMaterials[i])
-//                processMaterial(aiMaterial, materials, texturesDir)
-            }
+//            val numMaterials: Int = scene.mNumMaterials()
+//            val aiMaterials: PointerBuffer = scene.mMaterials()!!
+//            for (i in 0 until numMaterials) {
+//                val aiMaterial = AIMaterial.create(aiMaterials[i])
+////                processMaterial(aiMaterial, materials, texturesDir)
+//            }
 
             val aiMeshes = scene.mMeshes()!!
-            val numMeshes: Int = scene.mNumMeshes()
 
-            for (i in 0 until numMeshes) {
+            val sceneMeshCnt = scene.mNumMeshes()
+
+            for (i in 0 until sceneMeshCnt) {
                 val aiMesh = AIMesh.create(aiMeshes.get(i))
-                val mesh = Mesh(aiMesh)
+                val mesh = Mesh(aiMesh, false)
+//                aiMesh.
                 meshes.add(mesh)
+            }
+
+            if (hasOutlines){
+                val sceneNonTriangulated: AIScene = Assimp.aiImportFile(
+                    (_folderPath + _filePath),
+                    0
+                )!!
+                val aiMeshesNonTriangulated = sceneNonTriangulated.mMeshes()!!
+                val sceneNonTriangulatedMeshCnt = sceneNonTriangulated.mNumMeshes()
+                for (i in 0 until sceneNonTriangulatedMeshCnt) {
+                    val aiMesh = AIMesh.create(aiMeshesNonTriangulated.get(i))
+                    val mesh = Mesh(aiMesh, true)
+                    meshesOutlines.add(mesh)
+                }
             }
         } catch(e: Exception){
             println("Couldn't load model")
@@ -156,7 +104,10 @@ class Model(
         return true
     }
 
-    class Mesh(aiMesh: AIMesh){
+    class Mesh(
+        aiMesh: AIMesh,
+        isOutline: Boolean,
+    ){
         val posList: ArrayList<Float> = ArrayList()
         val texCoordList: ArrayList<Float> = ArrayList()
         val normalsList: ArrayList<Float> = ArrayList()
@@ -168,10 +119,12 @@ class Model(
         lateinit var vertexBuffer: VBIndexed
             private set
         val faceCount = aiMesh.mNumFaces()
-        val elementCount = faceCount * 3
         val vertexCount = aiMesh.mNumVertices()
+        var elementCount = faceCount * 3
+            internal set
 
         init{
+
             val positionsAssimp = aiMesh.mVertices()
             for( i in 0 until positionsAssimp.limit()){
                 val pos = positionsAssimp.get(i)
@@ -195,20 +148,45 @@ class Model(
                 normalsList.add(normal.z())
             }
 
+
+
             val facesBuffer = aiMesh.mFaces()
-            for (i in 0 until faceCount) {
-                val face: AIFace = facesBuffer[i]
+            if (isOutline){
+                elementCount = 0
+                for (i in 0 until faceCount) {
+                    val face: AIFace = facesBuffer[i]
 //                check(face.mNumIndices() == 3) { "AIFace.mNumIndices() != 3" }
 //                elementArrayBufferData.put(face.mIndices())
-                if (face.mNumIndices() != 3){
-                    println("Wrong index cnt")
+                    val numIndices = face.mNumIndices()
+                    if (numIndices != 3){
+//                        println("Wrong index cnt")
+                    }
+                    for (j in 0 until numIndices){
+                        indicesList.add(face.mIndices()[j])
+                    }
+                    indicesList.add(2147483647)
+
+                    elementCount += numIndices + 1
                 }
-                for (j in 0 until face.mNumIndices()){
-                    indicesList.add(face.mIndices()[j])
+            } else {
+                for (i in 0 until faceCount) {
+                    val face: AIFace = facesBuffer[i]
+//                check(face.mNumIndices() == 3) { "AIFace.mNumIndices() != 3" }
+//                elementArrayBufferData.put(face.mIndices())
+                    val numIndices = face.mNumIndices()
+                    if (numIndices != 3){
+                        println("Wrong index cnt")
+                    }
+                    for (j in 0 until face.mNumIndices()){
+                        indicesList.add(face.mIndices()[j])
+                    }
                 }
             }
 
-            vertexBuffer = VBIndexed(this)
+            if (isOutline)
+                vertexBuffer = VBIndexed(this, _primitiveType = VB.PrimitiveType.LINES_STRIP)
+            else
+                vertexBuffer = VBIndexed(this, _primitiveType = VB.PrimitiveType.TRIANGLES)
 
 //        val coloursAssimp = mesh.mColors(0)!!
 //        for( i in 0 until coloursAssimp.limit()){
@@ -287,7 +265,97 @@ class Model(
                 _culling,
                 _instanceCnt,
             )
-
+        }
+    }
+    fun renderOutlines(
+        _primitiveType: VB.PrimitiveType? = VB.PrimitiveType.LINES_STRIP,
+        _culling: VB.CullMode? = null,
+        _instanceCnt: Int = 1,
+    ) {
+        assert(meshesOutlines != null)
+        for (outlineMesh in meshesOutlines) {
+            outlineMesh.vertexBuffer.render(
+                _primitiveType,
+                _culling,
+                _instanceCnt,
+            )
         }
     }
 }
+
+
+
+
+//            var upAxis = 1
+//            var upAxisSign = 1
+//            var frontAxis = 2
+//            var frontAxisSign = 1
+//            var coordAxis = 0
+//            var coordAxisSign = 1
+//
+//            var unitScaleFactor = 1.0
+//
+//            val metaData =scene.mMetaData()!!
+//            for (metaDataIndex in 0 until metaData.mNumProperties()){
+//                val key = metaData.mKeys().get( metaDataIndex).dataString()
+//                val value = metaData.mValues().get(metaDataIndex)
+//
+//                if( key == "UnitScaleFactor" ){
+//                    val data = value.mData(1).get(0).toDouble()
+//                    unitScaleFactor = data
+//                } else {
+//                    val data = value.mData(1).get(0).toInt()
+//                    if( key == "UpAxis" ){
+//                        upAxis = data
+//                    } else if( key == "UpAxisSign" ){
+//                        upAxisSign = data
+//                    } else if( key == "FrontAxis" ){
+//                        frontAxis = data
+//                    } else if( key == "FrontAxisSign" ){
+//                        frontAxisSign = data
+//                    } else if( key == "CoordAxis" ){
+//                        coordAxis = data
+//                    } else if( key == "CoordAxisSign" ){
+//                        coordAxisSign = data
+//                    }
+//                }
+//            }
+//            var upVec: AIVector3D = AIVector3D.calloc()
+//            var forwardVec: AIVector3D = AIVector3D.calloc()
+//            var rightVec: AIVector3D = AIVector3D.calloc()
+//
+//            if(upAxis == 0){
+//                upVec.set(1.0f*upAxisSign*unitScaleFactor.toFloat(),0.0f,0.0f)
+//            } else if(upAxis == 1){
+//                upVec.set(0.0f,1.0f*upAxisSign*unitScaleFactor.toFloat(),0.0f)
+//            } else if(upAxis == 2){
+//                upVec.set(0.0f,0.0f,1.0f*upAxisSign*unitScaleFactor.toFloat())
+//            }
+//
+//            if(frontAxis == 0){
+//                forwardVec.set(1.0f*frontAxisSign*unitScaleFactor.toFloat(),0.0f,0.0f)
+//            } else if(frontAxis == 1){
+//                forwardVec.set(0.0f,1.0f*frontAxisSign*unitScaleFactor.toFloat(),0.0f)
+//            } else if(frontAxis == 2){
+//                forwardVec.set(0.0f,0.0f,1.0f*frontAxisSign*unitScaleFactor.toFloat())
+//            }
+//
+//            if(coordAxis == 0){
+//                rightVec.set(1.0f*coordAxisSign*unitScaleFactor.toFloat(),0.0f,0.0f)
+//            } else if(coordAxis == 1){
+//                rightVec.set(0.0f,1.0f*coordAxisSign*unitScaleFactor.toFloat(),0.0f)
+//            } else if(coordAxis == 2){
+//                rightVec.set(0.0f,0.0f,1.0f*coordAxisSign*unitScaleFactor.toFloat())
+//            }
+//
+//
+//
+//            var mat: AIMatrix4x4 = AIMatrix4x4.calloc()
+//            mat.set(
+//                rightVec.x(), rightVec.y(), rightVec.z(), 0.0f,
+//                upVec.x(), upVec.y(), upVec.z(), 0.0f,
+//                forwardVec.x(), forwardVec.y(), forwardVec.z(), 0.0f,
+//                0.0f, 0.0f, 0.0f, 1.0f,
+//            )
+//
+//            scene.mRootNode()!!.mTransformation(mat)

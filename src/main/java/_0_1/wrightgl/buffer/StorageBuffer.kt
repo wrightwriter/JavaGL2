@@ -38,7 +38,8 @@ class StorageBuffer private constructor(): AbstractBuffer() {
         totalVertCnt = _vertCnt
 
         // Array of zeroes
-        data = Array<Float>(_vertCnt){i->_initialValue}.toFloatArray()
+        // wtf, why does it need + !??
+        data = Array<Float>((_vertCnt + 1) * singleVertElementsCnt){i->_initialValue}.toFloatArray()
 
         createBuffer()
     }

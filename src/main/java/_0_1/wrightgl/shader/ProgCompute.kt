@@ -36,13 +36,10 @@ class ProgCompute(
                 System.err.println(errorLog)
             } else {
                 GL20.glValidateProgram(newPid)
+                successfulLinking = true
                 if (GL20.glGetProgrami(newPid, GL20.GL_VALIDATE_STATUS) == 0) {
-                    // TODO: throw error;
-                    successfulLinking = false
                     errorLog = GL20.glGetProgramInfoLog(newPid, 1024)
-                    System.err.println("Warning validating Shader code: " + GL20.glGetProgramInfoLog(newPid, 1024))
-                } else {
-                    successfulLinking = true
+                    System.err.println("Warning validating Shader code: \n " + GL20.glGetProgramInfoLog(newPid, 1024) + "\n")
                 }
             }
         }
